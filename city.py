@@ -9,20 +9,19 @@ from localization import VerticeLocalization, EdgeLocalization
 from vertice import Vertice
 from rubbishBin import RubbishBin
 
-def getVerticeNumberByName(vertices, verticeName):
-    for idx, vertice in enumerate(vertices):
-        if vertice.name ==  verticeName:
-            return idx
-    return None
-
-def getEdgeNumberByName(edges, edgeName):
-    for idx, edge in enumerate(edges):
-        if edge.name == edgeName:
-            return idx
-    return None
-
 
 class City:
+    def getVerticeNumberByName(self, verticeName):
+        for idx, vertice in enumerate(self.vertices):
+            if vertice.name == verticeName:
+                return idx
+        return None
+
+    def getEdgeNumberByName(self, edgeName):
+        for idx, edge in enumerate(self.edges):
+            if edge.name == edgeName:
+                return idx
+        return None
     def __init__(self, topographyFilePath, carFilePath):
         # Load JSON data
         try:
@@ -118,13 +117,13 @@ class City:
         for truck_name, truck_data in truck_data_json['trucks'].items():
             # Determine localization type
             if 'verticeLocalization' in truck_data:
-                verticeNumber = getVerticeNumberByName(self.vertices, truck_data['verticeLocalization'])
+                verticeNumber = self.getVerticeNumberByName(truck_data['verticeLocalization'])
                 if verticeNumber is None:
                     raise ValueError(f"Vertex '{truck_data['verticeLocalization']}' not found for truck {truck_name}")
                 localization = VerticeLocalization(verticeNumber)
             elif 'edgeLocalization' in truck_data:
                 edge_loc = truck_data['edgeLocalization']
-                edgeNumber = getEdgeNumberByName(self.edges, edge_loc['edgeName'])
+                edgeNumber = self.getEdgeNumberByName(edge_loc['edgeName'])
                 if edgeNumber is None:
                     raise ValueError(f"Edge '{edge_loc['edgeName']}' not found for truck {truck_name}")
                 distanceFromStart = edge_loc['distanceFromStart']
