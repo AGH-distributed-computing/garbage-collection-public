@@ -1,0 +1,466 @@
+{
+    "vertices": {
+        "skrzyzowanie1": {
+            "xCoord": 10,
+            "yCoord": 10,
+            "isGarbageDump": false
+        },
+        "skrzyzowanie2": {
+            "xCoord": 30,
+            "yCoord": 10,
+            "isGarbageDump": false
+        },
+        "skrzyzowanie3": {
+            "xCoord": 50,
+            "yCoord": 10,
+            "isGarbageDump": false
+        },
+        "skrzyzowanie4": {
+            "xCoord": 30,
+            "yCoord": 30,
+            "isGarbageDump": false
+        },
+        "skrzyzowanie5": {
+            "xCoord": 50,
+            "yCoord": 30,
+            "isGarbageDump": false
+        },
+        "wysypisko": {
+            "xCoord": 10,
+            "yCoord": 30,
+            "isGarbageDump": true
+        }
+    },
+    "edges": {
+        "Główna": {
+            "length": 3000,
+            "isOneWay": false,
+            "isCollectingBothSidesAllowed": true,
+            "firstVertice": "skrzyzowanie1",
+            "secondVertice": "skrzyzowanie2",
+            "trafficType": "city_center",
+            "trafficIntensity": "high",
+            "rightSideBins": [
+                {
+                    "location": 200,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 400,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 800,
+                    "binType": "apartment_building",
+                    "apartmentCount": 24,
+                    "capacity": 1100
+                },
+                {
+                    "location": 1200,
+                    "binType": "public_facility",
+                    "workerCount": 80,
+                    "capacity": 2200
+                },
+                {
+                    "location": 1800,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 2400,
+                    "binType": "apartment_building",
+                    "apartmentCount": 16,
+                    "capacity": 1100
+                }
+            ],
+            "leftSideBins": [
+                {
+                    "location": 300,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 600,
+                    "binType": "production_plant",
+                    "workerCount": 120,
+                    "capacity": 5500
+                },
+                {
+                    "location": 1000,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 1600,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 2200,
+                    "binType": "apartment_building",
+                    "apartmentCount": 18,
+                    "capacity": 1100
+                }
+            ]
+        },
+        "Przemysłowa": {
+            "length": 2500,
+            "isOneWay": false,
+            "isCollectingBothSidesAllowed": true,
+            "firstVertice": "skrzyzowanie2",
+            "secondVertice": "skrzyzowanie3",
+            "trafficType": "suburban",
+            "trafficIntensity": "medium",
+            "rightSideBins": [
+                {
+                    "location": 300,
+                    "binType": "production_plant",
+                    "workerCount": 200,
+                    "capacity": 5500
+                },
+                {
+                    "location": 900,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 1200,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 1800,
+                    "binType": "production_plant",
+                    "workerCount": 150,
+                    "capacity": 5500
+                }
+            ],
+            "leftSideBins": [
+                {
+                    "location": 400,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 1000,
+                    "binType": "apartment_building",
+                    "apartmentCount": 12,
+                    "capacity": 1100
+                },
+                {
+                    "location": 1500,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 2200,
+                    "binType": "detached_house",
+                    "capacity": 150
+                }
+            ]
+        },
+        "Osiedlowa": {
+            "length": 2800,
+            "isOneWay": true,
+            "isCollectingBothSidesAllowed": true,
+            "firstVertice": "skrzyzowanie2",
+            "secondVertice": "skrzyzowanie4",
+            "trafficType": "suburban",
+            "trafficIntensity": "low",
+            "rightSideBins": [
+                {
+                    "location": 200,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 500,
+                    "binType": "apartment_building",
+                    "apartmentCount": 30,
+                    "capacity": 1100
+                },
+                {
+                    "location": 900,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 1300,
+                    "binType": "apartment_building",
+                    "apartmentCount": 22,
+                    "capacity": 1100
+                },
+                {
+                    "location": 1700,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 2100,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 2500,
+                    "binType": "apartment_building",
+                    "apartmentCount": 14,
+                    "capacity": 1100
+                }
+            ],
+            "leftSideBins": [
+                {
+                    "location": 300,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 700,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 1100,
+                    "binType": "public_facility",
+                    "workerCount": 60,
+                    "capacity": 2200
+                },
+                {
+                    "location": 1500,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 1900,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 2300,
+                    "binType": "detached_house",
+                    "capacity": 150
+                }
+            ]
+        },
+        "Centralna": {
+            "length": 2000,
+            "isOneWay": false,
+            "isCollectingBothSidesAllowed": false,
+            "firstVertice": "skrzyzowanie3",
+            "secondVertice": "skrzyzowanie5",
+            "trafficType": "city_center",
+            "trafficIntensity": "high",
+            "rightSideBins": [
+                {
+                    "location": 300,
+                    "binType": "public_facility",
+                    "workerCount": 150,
+                    "capacity": 2200
+                },
+                {
+                    "location": 700,
+                    "binType": "apartment_building",
+                    "apartmentCount": 28,
+                    "capacity": 1100
+                },
+                {
+                    "location": 1200,
+                    "binType": "apartment_building",
+                    "apartmentCount": 20,
+                    "capacity": 1100
+                },
+                {
+                    "location": 1600,
+                    "binType": "production_plant",
+                    "workerCount": 90,
+                    "capacity": 5500
+                }
+            ],
+            "leftSideBins": [
+                {
+                    "location": 400,
+                    "binType": "apartment_building",
+                    "apartmentCount": 25,
+                    "capacity": 1100
+                },
+                {
+                    "location": 900,
+                    "binType": "public_facility",
+                    "workerCount": 100,
+                    "capacity": 2200
+                },
+                {
+                    "location": 1400,
+                    "binType": "apartment_building",
+                    "apartmentCount": 15,
+                    "capacity": 1100
+                }
+            ]
+        },
+        "Parkowa": {
+            "length": 2200,
+            "isOneWay": false,
+            "isCollectingBothSidesAllowed": true,
+            "firstVertice": "skrzyzowanie4",
+            "secondVertice": "skrzyzowanie5",
+            "trafficType": "suburban",
+            "trafficIntensity": "medium",
+            "rightSideBins": [
+                {
+                    "location": 250,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 600,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 1000,
+                    "binType": "apartment_building",
+                    "apartmentCount": 16,
+                    "capacity": 1100
+                },
+                {
+                    "location": 1500,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 1900,
+                    "binType": "detached_house",
+                    "capacity": 150
+                }
+            ],
+            "leftSideBins": [
+                {
+                    "location": 400,
+                    "binType": "public_facility",
+                    "workerCount": 70,
+                    "capacity": 2200
+                },
+                {
+                    "location": 800,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 1200,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 1700,
+                    "binType": "apartment_building",
+                    "apartmentCount": 19,
+                    "capacity": 1100
+                }
+            ]
+        },
+        "Dojazdowa": {
+            "length": 2600,
+            "isOneWay": true,
+            "isCollectingBothSidesAllowed": true,
+            "firstVertice": "skrzyzowanie1",
+            "secondVertice": "wysypisko",
+            "trafficType": "access_road",
+            "trafficIntensity": "low",
+            "rightSideBins": [
+                {
+                    "location": 400,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 800,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 1400,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 2000,
+                    "binType": "detached_house",
+                    "capacity": 150
+                }
+            ],
+            "leftSideBins": [
+                {
+                    "location": 600,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 1000,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 1600,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 2200,
+                    "binType": "detached_house",
+                    "capacity": 150
+                }
+            ]
+        },
+        "Łącznikowa": {
+            "length": 1800,
+            "isOneWay": false,
+            "isCollectingBothSidesAllowed": true,
+            "firstVertice": "wysypisko",
+            "secondVertice": "skrzyzowanie4",
+            "trafficType": "access_road",
+            "trafficIntensity": "medium",
+            "rightSideBins": [
+                {
+                    "location": 300,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 700,
+                    "binType": "apartment_building",
+                    "apartmentCount": 10,
+                    "capacity": 1100
+                },
+                {
+                    "location": 1200,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 1600,
+                    "binType": "detached_house",
+                    "capacity": 150
+                }
+            ],
+            "leftSideBins": [
+                {
+                    "location": 400,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 900,
+                    "binType": "detached_house",
+                    "capacity": 150
+                },
+                {
+                    "location": 1400,
+                    "binType": "apartment_building",
+                    "apartmentCount": 12,
+                    "capacity": 1100
+                }
+            ]
+        }
+    }
+}

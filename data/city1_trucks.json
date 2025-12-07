@@ -1,0 +1,35 @@
+{
+    "trucks": {
+        "Mercedes": {
+            "verticeLocalization": "wysypisko",
+			"fuelTankCapacity": 400,
+			"fuelConsumption": 30,
+			"fuelLevel": 400,
+			"capacity": 25000,
+			"crushingEfficiency": 0.6
+        },
+        "MAN": {
+            "verticeLocalization": "skrzyzowanie2",
+			"fuelTankCapacity": 600,
+			"fuelConsumption": 40,
+			"capacity": 30000,
+			"crushingEfficiency": 0.5,
+			"fuelLevel": 300,
+			"garbageLevel": 15500,
+			"timeSinceStart": 50
+        },
+		"Jelcz": {
+            "edgeLocalization": {
+				"edgeName": "Osiedlowa",
+				"distanceFromStart": 500
+			},
+			"fuelTankCapacity": 600,
+			"fuelConsumption": 50,
+			"capacity": 20000,
+			"crushingEfficiency": 0.4,
+			"fuelLevel": 500,
+			"garbageLevel": 10000,
+			"timeSinceStart": 100
+        }
+    }
+}
