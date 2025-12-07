@@ -92,7 +92,7 @@ class City:
 
             for bin_data in edge_data.get('leftSideBins', []):
                 location = bin_data['location']
-                rightSideBins[location] = getBinFromData(bin_data)
+                leftSideBins[location] = getBinFromData(bin_data)
 
 
             edge = Edge(
@@ -182,8 +182,16 @@ class City:
                         ):
         series_index = (current_time % time_series_duration) // tick_duration
         for edge in self.edges:
-            for bin in edge.rightSideBins:
-                bin.updateRubbish(
+            for rubbishBin in edge.rightSideBins.values():
+                rubbishBin.updateRubbish(
+                    detached_house_time_series,
+                    apartment_building_time_series,
+                    public_facility_time_series,
+                    production_plant_time_series,
+                    series_index
+                )
+            for rubbishBin in edge.leftSideBins.values():
+                rubbishBin.updateRubbish(
                     detached_house_time_series,
                     apartment_building_time_series,
                     public_facility_time_series,
