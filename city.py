@@ -10,6 +10,32 @@ from vertice import Vertice
 from rubbishBin import RubbishBin
 
 
+# create side array of bins basing on data from JSON
+def getBinFromData(binData):
+    location = binData['location']
+    type = binData['binType']
+    if (type != "detached_house"):
+        if (type == "apartment_building"):
+            usersCount = binData['apartmentCount']
+        elif (type == "public_facility"):
+            usersCount = binData['workerCount']
+        elif (type == "production_plant"):
+            usersCount = binData['workerCount']
+        else:
+            raise ValueError("Number of users must be provided when building type is other than detached_house")
+        rubbishBin = RubbishBin(
+            type=type,
+            capacity=binData['capacity'],
+            usersCount=usersCount
+        )
+    else:
+        rubbishBin = RubbishBin(
+            type=binData['binType'],
+            capacity=binData['capacity'],
+            usersCount=1
+        )
+    return rubbishBin
+
 class City:
     def getVerticeNumberByName(self, verticeName):
         for idx, vertice in enumerate(self.vertices):
@@ -62,19 +88,12 @@ class City:
 
             for bin_data in edge_data.get('rightSideBins', []):
                 location = bin_data['location']
-                rubbishBin = RubbishBin(
-                    type=bin_data['binType'],
-                    capacity=bin_data['capacity']
-                )
-                rightSideBins[location] = rubbishBin
+                rightSideBins[location] = getBinFromData(bin_data)
 
             for bin_data in edge_data.get('leftSideBins', []):
                 location = bin_data['location']
-                rubbishBin = RubbishBin(
-                    type=bin_data['binType'],
-                    capacity=bin_data['capacity']
-                )
-                leftSideBins[location] = rubbishBin
+                rightSideBins[location] = getBinFromData(bin_data)
+
 
             edge = Edge(
                 name=name,

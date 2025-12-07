@@ -19,9 +19,10 @@ class RubbishBinType(str, Enum):
             )
 
 class RubbishBin:
-    def __init__(self, type, capacity, fillLevel = 0):
+    def __init__(self, type, capacity, usersCount, fillLevel = 0):
         self.type = RubbishBinType.from_string(type)
         self.capacity = capacity #max capacity in litres
+        self.usersCount = usersCount
         self.fillLevel = fillLevel #current fill level in litres
 
     def emptyBin(self):
