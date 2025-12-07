@@ -167,3 +167,26 @@ class City:
             )
 
             self.garbage_collectors.append(gc)
+
+    #this function simulates one step in time according to rubbish generation
+    #it needs four time series types as arrays
+    #current_time, time_series and tick duration given in minutes
+    def updateRubbish(self,
+                        detached_house_time_series,
+                        apartment_building_time_series,
+                        public_facility_time_series,
+                        production_plant_time_series,
+                        time_series_duration,
+                        tick_duration,
+                        current_time
+                        ):
+        series_index = (current_time % time_series_duration) // tick_duration
+        for edge in self.edges:
+            for bin in edge.rightSideBins:
+                bin.updateRubbish(
+                    detached_house_time_series,
+                    apartment_building_time_series,
+                    public_facility_time_series,
+                    production_plant_time_series,
+                    series_index
+                )

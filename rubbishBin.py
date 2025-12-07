@@ -29,3 +29,22 @@ class RubbishBin:
         fillLevel = self.fillLevel
         self.fillLevel = 0
         return fillLevel
+
+#as written in presentation, we don't care what happens with extra garbage after bin is full, so we use mod
+    def updateRubbish(self,
+                        detached_house_time_series,
+                        apartment_building_time_series,
+                        public_facility_time_series,
+                        production_plant_time_series,
+                        series_index
+                        ):
+        if(self.type == RubbishBinType.DETACHED_HOUSE):
+            self.fillLevel += detached_house_time_series[series_index]
+        elif(self.type == RubbishBinType.PUBLIC_FACILITY):
+            self.fillLevel += public_facility_time_series[series_index]
+        elif(self.type == RubbishBinType.PRODUCTION_PLANT):
+            self.fillLevel += production_plant_time_series[series_index]
+        elif(self.type == RubbishBinType.APARTMENT_BUILDING):
+            self.fillLevel += apartment_building_time_series[series_index]
+
+        self.fillLevel %= self.capacity
