@@ -166,6 +166,7 @@ class City:
                 raise ValueError(f"Truck {truck_name} does not have verticeLocalization or edgeLocalization")
 
             gc = GarbageCollector(
+                name=truck_name,
                 localization=localization,
                 fuelTankCapacity=truck_data['fuelTankCapacity'],
                 fuelLevel=truck_data['fuelLevel'],
@@ -234,9 +235,3 @@ class City:
                     currentEdgeLength = self.edges[garbageCollector.localization.edgeNumber].length
                     garbageCollector.drive(speed, duration, currentEdgeLength)
 
-# this method allows to drive the truck to nearest vertice/a point on current edge
-#    def moveGarbageCollector(self, truckNumber, truckLocalization, ):
-# przyjmuje obiekt typu localization i sprawdzic, czy jest to ta sama krawedz/sasiedni wierzcholek
-# potem sprawdzic czy paliwa wystarczy
-# truckToMove = self.garbage_collectors[truckNumber]
-# if(truckToMove.fuelLevel > 0):

@@ -7,6 +7,7 @@ from localization import VerticeLocalization, EdgeLocalization, Localization
 #To simplify, fuelConsumption is given in litres per hour. It is not far from the objective truth, though
 class GarbageCollector:
     def __init__(self,
+                 name,
                  localization: Localization, #can be VerticeLocalization or EdgeLocalization
                  fuelTankCapacity,
                  fuelLevel,
@@ -16,6 +17,7 @@ class GarbageCollector:
                  timeSinceStart = 0, #in minutes
                  garbageLevel = 0
                  ):
+        self.name = name,
         self.localization = localization
         self.fuelTankCapacity = fuelTankCapacity
         self.fuelLevel = fuelLevel
