@@ -34,19 +34,29 @@ def getBinFromData(binData):
     return rubbishBin
 
 
-# returns True if bin was emptied
-def emptyBin(rubbishBin, binLocalization, garbageCollector):
-    if (isinstance(garbageCollector.localization, EdgeLocalization)):
-        if (garbageCollector.localization == binLocalization):
-            garbageLitres = rubbishBin.fillLevel
-            if (garbageCollector.canCollectGarbage(garbageLitres)):
-                garbageCollector.collectGarbage(garbageLitres)
-                rubbishBin.emptyBin()
-                return True
-    return False
-
-
 class City:
+
+    def getGarbageCollectorByName(self, name):
+        for garbageCollector in self.garbage_collectors:
+            if(garbageCollector.name == name):
+                return garbageCollector
+        return None
+
+    # returns True if bin was emptied
+    def emptyBin(self, rubbishBin, binLocalization, garbageCollectorName):
+        garbageCollector = self.getGarbageCollectorByName(garbageCollectorName)
+        if garbageCollector is None:
+            raise ValueError(f"Garbage collector with name {garbageCollectorName} not found!")
+
+        if (isinstance(garbageCollector.localization, EdgeLocalization)):
+            if (garbageCollector.localization == binLocalization):
+                garbageLitres = rubbishBin.fillLevel
+                if (garbageCollector.canCollectGarbage(garbageLitres)):
+                    garbageCollector.collectGarbage(garbageLitres)
+                    rubbishBin.emptyBin()
+                    return True
+        return False
+
     def getVerticeNumberByName(self, verticeName):
         for idx, vertice in enumerate(self.vertices):
             if vertice.name == verticeName:
