@@ -1,4 +1,5 @@
 import json
+from gc import garbage
 
 from edge import Edge
 from garbageCollector import GarbageCollector
@@ -40,6 +41,12 @@ class City:
         for garbageCollector in self.garbage_collectors:
             if(garbageCollector.name == name):
                 return garbageCollector
+        return None
+
+    def getVerticeByName(self, name):
+        for vertice in self.vertices:
+            if(vertice.name == name):
+                return vertice
         return None
 
     # returns True if bin was emptied
@@ -244,4 +251,26 @@ class City:
                 if isinstance(garbageCollector.localization, EdgeLocalization):
                     currentEdgeLength = self.edges[garbageCollector.localization.edgeNumber].length
                     garbageCollector.drive(speed, duration, currentEdgeLength)
+
+
+#Allows to plan journey to adjacent vertice
+    def orderTruckMovementToVertice(self, name, verticeName):
+        verticeNumber = self.getVerticeByName(verticeName)
+        if(verticeNumber is None):
+            print(f"Vertice with name {verticeName} not found!")
+            return
+        garbageCollector = self.getGarbageCollectorByName(name)
+        currentLocalization = garbageCollector.localization
+        currentEdge = None
+        if(isinstance(currentLocalization, EdgeLocalization)):
+            currentEdge = currentLocalization.edgeNumber
+        else:
+            print("This function allows orders only one step ahead")
+            return
+        if(self.edges[currentEdge].secondVertice == verticeNumber):
+            verticeDestination = VerticeLocalization(verticeNumber)
+            garbageCollector.setTargetLocalization(verticeDestination)
+        else:
+            print(f"Vertice with name {verticeName} is not adjacent to road, on which truck is!")
+            return
 
