@@ -13,6 +13,9 @@ class EdgeLocalization:
                 return True
             return False
 
+    def calculateDistance(self, EdgeLocalization):
+        return EdgeLocalization.distanceFromStart - self.distanceFromStart
+
 class VerticeLocalization:
     def __init__(self, verticeNumber):
         self.verticeNumber = verticeNumber

@@ -26,6 +26,7 @@ running = True
 current_time = 0
 tick_duration = 15
 
+#we calculate fuel consumption by hours, so at each loop iteration fuel should be decreased
 while running:
     city.updateRubbish(detached_house_time_series,
                         apartment_building_time_series,
@@ -35,4 +36,5 @@ while running:
                         tick_duration=tick_duration,
                         current_time=current_time
                         )
+    city.decreaseAllFuel(tick_duration)
     current_time += tick_duration

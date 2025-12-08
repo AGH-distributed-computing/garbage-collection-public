@@ -24,6 +24,7 @@ class GarbageCollector:
         self.fuelConsumption = fuelConsumption
         self.timeSinceStart = timeSinceStart
         self.garbageLevel = garbageLevel
+        self.targetLocalization = None
 
     def canCollectGarbage(self, litres):
         if(self.garbageLevel + litres * self.crushingEfficiency <= self.capcity):
@@ -32,3 +33,28 @@ class GarbageCollector:
 
     def collectGarbage(self, litres):
         self.garbageLevel += litres * self.crushingEfficiency
+
+    def consumeFuel(self, minutes):
+        self.fuelLevel -= self.fuelConsumption * minutes / 60
+        self.fuelLevel = max(self.fuelLevel, 0)
+
+    def setTargetLocalization(self, targetLocalization):
+        self.targetLocalization = targetLocalization
+
+#speed given in kilometers per hour, duration in minutes
+#works only for edge to vertice or edge to edge
+#Before travel between vertices, set lcalization to point 0 on appropriate edge
+    def drive(self, speed, duration, currentEdgeLength):
+        if(isinstance(self.localization, VerticeLocalization)):
+            raise TypeError("trucks localization must be of type EdgeLocalization in order to use drive function")
+
+        distanceTruckCanTravel = speed * duration / 60
+        if(isinstance(self.targetLocalization, VerticeLocalization)):
+            if(distanceTruckCanTravel >= currentEdgeLength):
+                self.localization = self.targetLocalization
+                self.targetLocalization = None
+        elif(isinstance(self.localization, EdgeLocalization)):
+            travelDistance = self.localization.calculateDistance(self.targetLocalization)
+            if(distanceTruckCanTravel >= travelDistance):
+                self.localization = self.targetLocalization
+                self.targetLocalization = None

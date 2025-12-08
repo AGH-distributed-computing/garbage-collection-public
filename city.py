@@ -45,7 +45,7 @@ def emptyBin(rubbishBin, binLocalization,  garbageCollector):
             if(garbageCollector.canCollectGarbage(garbageLitres)):
                 garbageCollector.collectGarbage(garbageLitres)
                 rubbishBin.emptyBin()
-
+                return True
     return False
 
 class City:
@@ -210,3 +210,10 @@ class City:
                     production_plant_time_series,
                     series_index
                 )
+
+    def decreaseAllFuel(self, minutes):
+        for garbage_collector in self.garbage_collectors:
+            garbage_collector.consumeFuel(minutes)
+
+
+
