@@ -1,6 +1,7 @@
 #city.py
 
 import json
+from gc import garbage
 from logging import NullHandler
 
 from edge import Edge
@@ -35,6 +36,17 @@ def getBinFromData(binData):
             usersCount=1
         )
     return rubbishBin
+
+#returns True if bin was emptied
+def emptyBin(rubbishBin, binLocalization,  garbageCollector):
+    if(isinstance(garbageCollector.localization, EdgeLocalization)):
+        if(garbageCollector.localization == binLocalization):
+            garbageLitres = rubbishBin.fillLevel
+            if(garbageCollector.canCollectGarbage(garbageLitres)):
+                garbageCollector.collectGarbage(garbageLitres)
+                rubbishBin.emptyBin()
+
+    return False
 
 class City:
     def getVerticeNumberByName(self, verticeName):

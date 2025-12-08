@@ -24,3 +24,11 @@ class GarbageCollector:
         self.fuelConsumption = fuelConsumption
         self.timeSinceStart = timeSinceStart
         self.garbageLevel = garbageLevel
+
+    def canCollectGarbage(self, litres):
+        if(self.garbageLevel + litres * self.crushingEfficiency <= self.capcity):
+            return True
+        return False
+
+    def collectGarbage(self, litres):
+        self.garbageLevel += litres * self.crushingEfficiency
