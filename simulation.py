@@ -25,6 +25,7 @@ city = City("data/city1_topography.json", "data/city1_trucks.json")
 running = True
 current_time = 0
 tick_duration = 15
+average_speed = 20 #to be swapped by getting speed on road for given time using traffic time series in the future
 
 #we calculate fuel consumption by hours, so at each loop iteration fuel should be decreased
 while running:
@@ -36,5 +37,6 @@ while running:
                         tick_duration=tick_duration,
                         current_time=current_time
                         )
+    city.moveAllGarbageCollectors(average_speed, 15)
     city.decreaseAllFuel(tick_duration)
     current_time += tick_duration

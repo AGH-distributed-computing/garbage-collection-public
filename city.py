@@ -1,8 +1,4 @@
-#city.py
-
 import json
-from gc import garbage
-from logging import NullHandler
 
 from edge import Edge
 from garbageCollector import GarbageCollector
@@ -37,16 +33,18 @@ def getBinFromData(binData):
         )
     return rubbishBin
 
-#returns True if bin was emptied
-def emptyBin(rubbishBin, binLocalization,  garbageCollector):
-    if(isinstance(garbageCollector.localization, EdgeLocalization)):
-        if(garbageCollector.localization == binLocalization):
+
+# returns True if bin was emptied
+def emptyBin(rubbishBin, binLocalization, garbageCollector):
+    if (isinstance(garbageCollector.localization, EdgeLocalization)):
+        if (garbageCollector.localization == binLocalization):
             garbageLitres = rubbishBin.fillLevel
-            if(garbageCollector.canCollectGarbage(garbageLitres)):
+            if (garbageCollector.canCollectGarbage(garbageLitres)):
                 garbageCollector.collectGarbage(garbageLitres)
                 rubbishBin.emptyBin()
                 return True
     return False
+
 
 class City:
     def getVerticeNumberByName(self, verticeName):
@@ -60,6 +58,7 @@ class City:
             if edge.name == edgeName:
                 return idx
         return None
+
     def __init__(self, topographyFilePath, carFilePath):
         # Load JSON data
         try:
@@ -105,7 +104,6 @@ class City:
             for bin_data in edge_data.get('leftSideBins', []):
                 location = bin_data['location']
                 leftSideBins[location] = getBinFromData(bin_data)
-
 
             edge = Edge(
                 name=name,
@@ -180,18 +178,18 @@ class City:
 
             self.garbage_collectors.append(gc)
 
-    #this function simulates one step in time according to rubbish generation
-    #it needs four time series types as arrays
-    #current_time, time_series and tick duration given in minutes
+    # this function simulates one step in time according to rubbish generation
+    # it needs four time series types as arrays
+    # current_time, time_series and tick duration given in minutes
     def updateRubbish(self,
-                        detached_house_time_series,
-                        apartment_building_time_series,
-                        public_facility_time_series,
-                        production_plant_time_series,
-                        time_series_duration,
-                        tick_duration,
-                        current_time
-                        ):
+                      detached_house_time_series,
+                      apartment_building_time_series,
+                      public_facility_time_series,
+                      production_plant_time_series,
+                      time_series_duration,
+                      tick_duration,
+                      current_time
+                      ):
         series_index = (current_time % time_series_duration) // tick_duration
         for edge in self.edges:
             for rubbishBin in edge.rightSideBins.values():
@@ -215,5 +213,30 @@ class City:
         for garbage_collector in self.garbage_collectors:
             garbage_collector.consumeFuel(minutes)
 
+    def moveAllGarbageCollectors(self, speed, duration):
+        for garbageCollector in self.garbage_collectors:
+            if garbageCollector.targetLocalization != None:  # if current truck has no target, we skip it
+                if (isinstance(garbageCollector.localization,
+                               VerticeLocalization)):  # drive function accepts only edge-vertice or edge-edge, so we need to set appropriate with distanceFromStart equal to 0
+                    targetEdgeNumber = None
+                    targetVertice = garbageCollector.targetLocalization.verticeNumber
+                    for (verticeNumber, edgeNumber) in self.map[garbageCollector.localization.verticeNumber]:
+                        if verticeNumber == targetVertice:
+                            targetEdgeNumber = edgeNumber
+                    if (targetEdgeNumber is None):
+                        raise TypeError(
+                            "Target vertice is not adjacent to source vertice!")
+                    targetLocalization = EdgeLocalization(targetEdgeNumber, 0)
+                    garbageCollector.setTargetLocalization(targetLocalization)
 
+                # Only get currentEdgeLength and drive if the collector is on an edge
+                if isinstance(garbageCollector.localization, EdgeLocalization):
+                    currentEdgeLength = self.edges[garbageCollector.localization.edgeNumber].length
+                    garbageCollector.drive(speed, duration, currentEdgeLength)
 
+# this method allows to drive the truck to nearest vertice/a point on current edge
+#    def moveGarbageCollector(self, truckNumber, truckLocalization, ):
+# przyjmuje obiekt typu localization i sprawdzic, czy jest to ta sama krawedz/sasiedni wierzcholek
+# potem sprawdzic czy paliwa wystarczy
+# truckToMove = self.garbage_collectors[truckNumber]
+# if(truckToMove.fuelLevel > 0):
