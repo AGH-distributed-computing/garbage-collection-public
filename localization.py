@@ -20,4 +20,9 @@ class VerticeLocalization:
     def __init__(self, verticeNumber):
         self.verticeNumber = verticeNumber
 
+class BinLocalization:
+    def __init__(self, edgeLocalization, side):
+        self.edgeLocalization = edgeLocalization
+        self.side = side
+
 Localization = Union[VerticeLocalization, EdgeLocalization]

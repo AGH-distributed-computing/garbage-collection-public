@@ -1,16 +1,15 @@
 #command.py
 from typing import Union
 
-from localization import VerticeLocalization, EdgeLocalization
-
+from localization import VerticeLocalization, EdgeLocalization, BinLocalization
 
 class MoveToVertice:
-    vertice: VerticeLocalization
+    verticeLocalization: VerticeLocalization
 
 class MoveToEdge:
-    edge: EdgeLocalization
+    edgeLocalization: EdgeLocalization
 
 class EmptyBin:
-    edge: EdgeLocalization
+    binLocalization: BinLocalization
 
 Command = Union[MoveToVertice, MoveToEdge, EmptyBin]
