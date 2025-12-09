@@ -196,6 +196,24 @@ class City:
 
             self.garbage_collectors.append(gc)
 
+    #Allows to retrieve Bin having edge
+    def getBinFromEdge(self, edge, distance, side):
+        if(side=="left"):
+            if(distance in edge.leftSideBins):
+                return edge.leftSideBins[distance]
+            else:
+                print(f"Left side bin on distance: {distance} does not exist")
+                return None
+        elif(side=="right"):
+            if(distance in edge.rightSideBins):
+                return edge.rightSideBins[distance]
+            else:
+                print(f"Right side bin on distance: {distance} does not exist")
+                return None
+        else:
+            print("Side must be either left or right")
+            return None
+
     # this function simulates one step in time according to rubbish generation
     # it needs four time series types as arrays
     # current_time, time_series and tick duration given in minutes
@@ -253,13 +271,13 @@ class City:
                     garbageCollector.drive(speed, duration, currentEdgeLength)
 
 
-#Allows to plan journey to adjacent vertice
-    def orderTruckMovementToVertice(self, name, verticeName):
+    #Allows to plan journey to adjacent vertice
+    def orderTruckMovementToVertice(self, garbageCollectorName, verticeName):
         verticeNumber = self.getVerticeByName(verticeName)
         if(verticeNumber is None):
             print(f"Vertice with name {verticeName} not found!")
             return
-        garbageCollector = self.getGarbageCollectorByName(name)
+        garbageCollector = self.getGarbageCollectorByName(garbageCollectorName)
         currentLocalization = garbageCollector.localization
         currentEdge = None
         if(isinstance(currentLocalization, EdgeLocalization)):
@@ -273,4 +291,18 @@ class City:
         else:
             print(f"Vertice with name {verticeName} is not adjacent to road, on which truck is!")
             return
+
+    #function returning bin by localization and side of the road, binLocalization is an instance of EdgeLocalization class
+    def getBinByLocalization(self, binLocalization, binSide):
+        if(isinstance(binLocalization, EdgeLocalization)):
+            edgeNumber = binLocalization.edgeNumber
+            #poszukac kosza o odleglosci i go zwrocic
+            return self.getBinFromEdge(self.edges[edgeNumber], binLocalization.distanceFromStart, binSide)
+        else:
+            print("Localization of the bin must be of EdgeLocalization type")
+
+#Allow to plan journey to point on edge
+#distance parameter is the distance from sorce vertice
+#    def OrderTruckMovementToEdge(self, garbageCollectorName, edgeName, distance)
+        #jezeli truck jest w wierzcholku, pamietac zmienic na zerowa odleglosc na krawedzi wchodzacej do wierzcholka docelowego
 

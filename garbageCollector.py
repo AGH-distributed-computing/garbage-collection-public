@@ -1,4 +1,5 @@
 #garbageCollector.py
+from collections import deque
 
 from localization import VerticeLocalization, EdgeLocalization, Localization
 
@@ -27,6 +28,7 @@ class GarbageCollector:
         self.timeSinceStart = timeSinceStart
         self.garbageLevel = garbageLevel
         self.targetLocalization = None
+        self.orders = deque()
 
     def canCollectGarbage(self, litres):
         if(self.garbageLevel + litres * self.crushingEfficiency <= self.capcity):
