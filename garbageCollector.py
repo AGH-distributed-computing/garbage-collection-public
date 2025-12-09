@@ -28,7 +28,6 @@ class GarbageCollector:
         self.timeSinceStart = timeSinceStart
         self.garbageLevel = garbageLevel
         self.targetLocalization = None
-        self.orders = deque()
 
     def canCollectGarbage(self, litres):
         if(self.garbageLevel + litres * self.crushingEfficiency <= self.capcity):
@@ -45,20 +44,36 @@ class GarbageCollector:
     def setTargetLocalization(self, targetLocalization):
         self.targetLocalization = targetLocalization
 
+    def canTakeNextOrder(self):
+        if(self.targetLocalization is None):
+            return True
+        return False
+
 #speed given in kilometers per hour, duration in minutes
 #works only for edge to vertice or edge to edge
 #Before travel between vertices, set lcalization to point 0 on appropriate edge
+#returns time left out of duration param
     def drive(self, speed, duration, currentEdgeLength):
         if(isinstance(self.localization, VerticeLocalization)):
             raise TypeError("trucks localization must be of type EdgeLocalization in order to use drive function")
 
-        distanceTruckCanTravel = speed * duration / 60
+        distanceTruckCanTravel = speed * 1000 * duration / 60
         if(isinstance(self.targetLocalization, VerticeLocalization)):
-            if(distanceTruckCanTravel >= currentEdgeLength):
+            if(self.localization.distanceFromStart + distanceTruckCanTravel >= currentEdgeLength):
+                travelTime = (currentEdgeLength - self.localization.distanceFromStart) / 1000 / speed * 60
                 self.localization = self.targetLocalization
                 self.targetLocalization = None
+                return travelTime
+            else:
+                self.localization.distanceFromStart += distanceTruckCanTravel
+                return 0
         elif(isinstance(self.localization, EdgeLocalization)):
             travelDistance = self.localization.calculateDistance(self.targetLocalization)
-            if(distanceTruckCanTravel >= travelDistance):
+            travelTime = travelDistance / 1000 / speed * 60
+            if(self.localization.distanceFromStart + distanceTruckCanTravel >= travelDistance):
                 self.localization = self.targetLocalization
                 self.targetLocalization = None
+                return travelTime
+            else:
+                self.localization.distanceFromStart += distanceTruckCanTravel
+                return 0
