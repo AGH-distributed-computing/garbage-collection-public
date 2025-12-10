@@ -56,14 +56,14 @@ class City:
             if cmd_type == "goToVertice":
                 destination = cmd.get("destination")
                 move_cmd = MoveToVertice()
-                move_cmd.verticeLocalization = VerticeLocalization(destination)
+                move_cmd.verticeLocalization = VerticeLocalization(self.getVerticeNumberByName(destination))
                 self.garbage_collector_commands[truckNumber].append(move_cmd)
 
             elif cmd_type == "goToEdgePlace":
                 edge = cmd.get("edge")
                 distance = cmd.get("distance")
                 move_cmd = MoveToEdge()
-                move_cmd.edgeLocalization = EdgeLocalization(edge, distance)
+                move_cmd.edgeLocalization = EdgeLocalization(self.getEdgeNumberByName(edge), distance)
                 self.garbage_collector_commands[truckNumber].append(move_cmd)
 
             elif cmd_type == "collectGarbage":
@@ -185,7 +185,7 @@ class City:
 
             # Get vertex indices
             first_idx = self.getVerticeNumberByName(edge_data['firstVertice'])
-            second_idx = self.getVerticeNumberByName(edge_data['firstVertice'])
+            second_idx = self.getVerticeNumberByName(edge_data['secondVertice'])
 
             # Add edge to adjacency list
             self.map[first_idx].append((second_idx, idx))
