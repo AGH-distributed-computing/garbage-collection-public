@@ -5,7 +5,7 @@ from collections import deque
 from command import MoveToVertice, MoveToEdge, EmptyBin
 from edge import Edge
 from garbageCollector import GarbageCollector
-from localization import VerticeLocalization, EdgeLocalization
+from localization import VerticeLocalization, EdgeLocalization, RubbishBinSide
 from vertice import Vertice
 from rubbishBin import RubbishBin
 
@@ -39,14 +39,55 @@ def getBinFromData(binData):
 
 class City:
 
-    #TODO: function which takes json, checks if it is correct and adds to queue order
-#    def parseOrdersForTruck(self, truckName, jsonOrders):
+    #takes string in json format and adds its commands
+    def parseOrdersForTruck(self, jsonOrders):
+        data = json.loads(jsonOrders)
+        truckName = data.get("truckName")
+
+        truckNumber = self.getGarbageCollectorNumberByName(truckName)
+
+        #this line may be used to replace currently existing commands
+        #self.garbage_collector_commands[truckNumber].clear()
+
+        commands = data.get("commands", [])
+        for cmd in commands:
+            cmd_type = cmd.get("type")
+
+            if cmd_type == "goToVertice":
+                destination = cmd.get("destination")
+                move_cmd = MoveToVertice()
+                move_cmd.verticeLocalization = VerticeLocalization(destination)
+                self.garbage_collector_commands[truckNumber].append(move_cmd)
+
+            elif cmd_type == "goToEdgePlace":
+                edge = cmd.get("edge")
+                distance = cmd.get("distance")
+                move_cmd = MoveToEdge()
+                move_cmd.edgeLocalization = EdgeLocalization(edge, distance)
+                self.garbage_collector_commands[truckNumber].append(move_cmd)
+
+            elif cmd_type == "collectGarbage":
+                side = cmd.get("side")
+                empty_cmd = EmptyBin()
+                empty_cmd.side = RubbishBinSide.from_string(side)
+                self.garbage_collector_commands[truckNumber].append(empty_cmd)
+
+            else:
+                raise ValueError(f"Unknown command type: {cmd_type}")
+
+        #TODO: add checking garbage_collector_commands[truckNumber]
 
 
     def getGarbageCollectorByName(self, name):
         for garbageCollector in self.garbage_collectors:
             if(garbageCollector.name == name):
                 return garbageCollector
+        return None
+
+    def getGarbageCollectorNumberByName(self, name):
+        for idx, garbageCollector in enumerate(self.garbage_collectors):
+            if (garbageCollector.name == name):
+                return idx
         return None
 
     def getVerticeByName(self, name):

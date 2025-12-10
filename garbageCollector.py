@@ -18,7 +18,7 @@ class GarbageCollector:
                  timeSinceStart = 0, #in minutes
                  garbageLevel = 0
                  ):
-        self.name = name,
+        self.name = name
         self.localization = localization
         self.fuelTankCapacity = fuelTankCapacity
         self.fuelLevel = fuelLevel

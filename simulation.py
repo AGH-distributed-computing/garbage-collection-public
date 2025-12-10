@@ -28,6 +28,17 @@ tick_duration = 15
 empty_bin_duration = 1
 average_speed = 20 #to be swapped by getting speed on road for given time using traffic time series in the future
 
+filepath = "data/example_truck_orders.json"
+
+try:
+    with open(filepath, 'r', encoding='utf-8') as file:
+        json_string = file.read()
+
+    city.parseOrdersForTruck(json_string)
+except FileNotFoundError:
+    print(f"Error: File '{filepath}' not found")
+    raise
+
 #we calculate fuel consumption by hours, so at each loop iteration fuel should be decreased
 while running:
     city.updateRubbish(detached_house_time_series,
