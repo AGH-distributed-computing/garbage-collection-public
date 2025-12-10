@@ -1,6 +1,9 @@
+import heapq
 import json
+from collections import deque
 from gc import garbage
 
+from command import MoveToVertice, MoveToEdge, EmptyBin
 from edge import Edge
 from garbageCollector import GarbageCollector
 from localization import VerticeLocalization, EdgeLocalization
@@ -36,6 +39,10 @@ def getBinFromData(binData):
 
 
 class City:
+
+    #TODO: function which takes json, checks if it is correct and adds to queue order
+    def parseOrdersForTruck(self, truckName, jsonOrders):
+        pass
 
     def getGarbageCollectorByName(self, name):
         for garbageCollector in self.garbage_collectors:
@@ -159,6 +166,7 @@ class City:
             raise
 
         self.garbage_collectors = []
+        self.garbage_collector_commands = []
 
         for truck_name, truck_data in truck_data_json['trucks'].items():
             # Determine localization type
@@ -181,6 +189,7 @@ class City:
                 )
             else:
                 raise ValueError(f"Truck {truck_name} does not have verticeLocalization or edgeLocalization")
+            self.garbage_collector_commands.append(deque())
 
             gc = GarbageCollector(
                 name=truck_name,
@@ -269,6 +278,86 @@ class City:
                 if isinstance(garbageCollector.localization, EdgeLocalization):
                     currentEdgeLength = self.edges[garbageCollector.localization.edgeNumber].length
                     garbageCollector.drive(speed, duration, currentEdgeLength)
+
+    #returns edge number that leads from source to destination
+    def findEdgeNumberToReachVertice(self, sourceVertice, destinationVertice):
+        if(sourceVertice not in self.map):
+            print(f"Vertice with number '{sourceVertice}' not found.")
+            return None
+        for (verticeNumber, edgeNumber) in self.map[sourceVertice]:
+            if(verticeNumber == destinationVertice):
+                return edgeNumber
+        print(f"Vertice connecting '{sourceVertice}' and '{destinationVertice}' not found.")
+        return None
+
+    def setTruckToTravelFromVerticeToVertice(self, garbageCollector, destinationVertice):
+        if isinstance(garbageCollector.localization, VerticeLocalization):
+            currentVertice = garbageCollector.localization.verticeNumber
+            edgeNumber = self.findEdgeNumberToReachVertice(currentVertice, destinationVertice)
+            garbageCollector.localization = EdgeLocalization(edgeNumber, 0)
+        else:
+            print("Function can be used only when truck is in vertice!")
+#speed in kilometers per hour, duration and emptyBinDuration
+    def executeOrders(self, speed, tickDuration, emptyBinDuration):
+        timeList = []
+        for i in range (0, len(self.garbage_collectors)):
+            if self.garbage_collector_commands[i]:
+                timeList.append((i, tickDuration))
+        heap = [(-timeLeft, truck) for truck, timeLeft in timeList]
+        heapq.heapify(heap)
+
+        while heap:
+            neg_timeLeft, truck = heapq.heappop(heap)
+            timeLeft = -neg_timeLeft
+            if timeLeft == 0:
+                break
+
+            #tu wykonac pojedynczy ruch z poczatku kolejki
+            #co jesli zostanie troche czasu, ale tyle, ze nie da sie zaladowac kosza, wtedy timeLeft nie bedzie zerem, a jakas wielkoscia
+            #mozna wprowadzic funkcje, ktora sprawdza, czy dana smieciarka moze jeszcze cokolwiek zrobic i jesli nie, to usuwamy ja z kolejki
+            #typu canExecuteOrder
+            #w zasadzie problem jest tylko ze smieciami (bo jazda zawsze powinna wyzerować) wiec mozna dorobic if time < emptyBinDuration and nextOrder ==emptyBin
+            garbageCollector = self.garbage_collectors[truck]
+            command = self.garbage_collector_commands[truck].popleft()
+            usedTime = 0
+            #drive method from GarbageCollector has no idea about graph structure, so we place truck on point 0 on appropriate edge
+            if(isinstance(garbageCollector.localization, VerticeLocalization) and isinstance(command, MoveToVertice)):
+                targetVertice = command.verticeLocalization.verticeNumber
+                currentVertice = garbageCollector.localization.verticeNumber
+                edgeNumber = self.findEdgeNumberToReachVertice(currentVertice, targetVertice)
+                garbageCollector.localization = EdgeLocalization(edgeNumber, 0)
+                garbageCollector.setTargetLocalization(command.verticeLocalization)
+                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[edgeNumber])
+
+            elif(isinstance(garbageCollector.localization, EdgeLocalization) and isinstance(command, MoveToVertice)):
+                #maybe it should be checked if edge really points at vertice?
+                garbageCollector.setTargetLocalization(command.verticeLocalization)
+                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber])
+
+            elif(isinstance(garbageCollector.localization, EdgeLocalization) and isinstance(command, MoveToEdge)):
+                #maybe it should be cheked if both edges are the same
+                garbageCollector.setTargetLocalization(command.edgeLocalization)
+                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber])
+
+            elif(isinstance(garbageCollector.localization, EdgeLocalization) and isinstance(command, MoveToVertice)):
+                garbageCollector.setTargetLocalization(command.verticeLocalization)
+                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber])
+
+            elif(isinstance(command, EmptyBin)):
+                if(command.binLocalization.edgeLocalization == garbageCollector.localization):
+                    print("Garbage collector must be on the same location as bin it empties!")
+                else:
+                    if(timeLeft >= emptyBinDuration): #if there's no time left for emptying the bin, we cannot do it
+                        bin = self.getBinByLocalization(command.binLocalization.edgeLocalization, command.binLocalization.side)
+                        if(garbageCollector.canCollectGarbage(bin.fillLevel)):
+                            garbageCollector.collectGarbage(bin.fillLevel)
+                            bin.emptyBin()
+                            usedTime += emptyBinDuration
+                    else:
+                        self.garbage_collector_commands[truck].appendleft(command)
+
+            timeLeft -= usedTime
+            heapq.heappush(heap, (-timeLeft, truck))
 
 
     #Allows to plan journey to adjacent vertice
