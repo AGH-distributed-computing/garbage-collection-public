@@ -40,8 +40,8 @@ def getBinFromData(binData):
 class City:
 
     #TODO: function which takes json, checks if it is correct and adds to queue order
-    def parseOrdersForTruck(self, truckName, jsonOrders):
-        pass
+#    def parseOrdersForTruck(self, truckName, jsonOrders):
+
 
     def getGarbageCollectorByName(self, name):
         for garbageCollector in self.garbage_collectors:
@@ -342,18 +342,18 @@ class City:
                 garbageCollector.setTargetLocalization(command.verticeLocalization)
                 usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber], self.garbage_dumps)
 
-            elif(isinstance(command, EmptyBin)):
-                if(command.binLocalization.edgeLocalization == garbageCollector.localization):
-                    print("Garbage collector must be on the same location as bin it empties!")
-                else:
-                    if(timeLeft >= emptyBinDuration): #if there's no time left for emptying the bin, we cannot do it
-                        bin = self.getBinByLocalization(command.binLocalization.edgeLocalization, command.binLocalization.side)
-                        if(garbageCollector.canCollectGarbage(bin.fillLevel)):
-                            garbageCollector.collectGarbage(bin.fillLevel)
-                            bin.emptyBin()
-                            usedTime += emptyBinDuration
+            #change garbage collecting check if there is a bin at current location and if is, collecting it instead of requiring location
+            elif (isinstance(command, EmptyBin)):
+                if (timeLeft >= emptyBinDuration):  # if there's no time left for emptying the bin, we cannot do it
+                    bin = self.getBinFromEdge(self.edges[garbageCollector.localization.edgeNumber], garbageCollector.localization.distanceFromStart, command.side)
+                    if(garbageCollector.canCollectGarbage(bin.fillLevel)):
+                        garbageCollector.collectGarbage(bin.fillLevel)
+                        bin.emptyBin()
+                        usedTime += emptyBinDuration
                     else:
-                        self.garbage_collector_commands[truck].appendleft(command)
+                        print(f"Garbage collector: '{garbageCollector.name}' is full and could not collect additional garbage.")
+                else:
+                    self.garbage_collector_commands[truck].appendleft(command)
 
             timeLeft -= usedTime
             heapq.heappush(heap, (-timeLeft, truck))

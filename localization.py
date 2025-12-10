@@ -1,4 +1,5 @@
 #localization.py
+from enum import Enum
 from typing import Union
 
 class EdgeLocalization:
@@ -20,9 +21,15 @@ class VerticeLocalization:
     def __init__(self, verticeNumber):
         self.verticeNumber = verticeNumber
 
-class BinLocalization:
-    def __init__(self, edgeLocalization, side):
-        self.edgeLocalization = edgeLocalization
-        self.side = side
+class RubbishBinSide(str, Enum):
+    LEFT = "left"
+    RIGHT = "right"
+
+    @classmethod
+    def from_string(cls, value: str) -> "RubbishBinSide":
+        try:
+            return cls(value)
+        except ValueError:
+            raise ValueError("Side must be either left or right!")
 
 Localization = Union[VerticeLocalization, EdgeLocalization]
