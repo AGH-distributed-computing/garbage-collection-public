@@ -53,7 +53,7 @@ class GarbageCollector:
 #works only for edge to vertice or edge to edge
 #Before travel between vertices, set lcalization to point 0 on appropriate edge
 #returns time left out of duration param
-    def drive(self, speed, duration, currentEdgeLength):
+    def drive(self, speed, duration, currentEdgeLength, garbageDumps):
         if(isinstance(self.localization, VerticeLocalization)):
             raise TypeError("trucks localization must be of type EdgeLocalization in order to use drive function")
 
@@ -62,6 +62,9 @@ class GarbageCollector:
             if(self.localization.distanceFromStart + distanceTruckCanTravel >= currentEdgeLength):
                 travelTime = (currentEdgeLength - self.localization.distanceFromStart) / 1000 / speed * 60
                 self.localization = self.targetLocalization
+                if(self.localization.verticeNumber in garbageDumps):
+                    print(f"Garbage collector '{self.name}' reached the base. Refuelling and dumping garbage...")
+                    self.baseReached()
                 self.targetLocalization = None
                 return travelTime
             else:
@@ -77,3 +80,8 @@ class GarbageCollector:
             else:
                 self.localization.distanceFromStart += distanceTruckCanTravel
                 return 0
+
+    def baseReached(self):
+        self.FuelLevel = self.fuelTankCapacity
+        self.garbageLevel = 0
+        self.timeSinceStart = 0

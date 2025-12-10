@@ -1,7 +1,6 @@
 import heapq
 import json
 from collections import deque
-from gc import garbage
 
 from command import MoveToVertice, MoveToEdge, EmptyBin
 from edge import Edge
@@ -72,10 +71,7 @@ class City:
         return False
 
     def getVerticeNumberByName(self, verticeName):
-        for idx, vertice in enumerate(self.vertices):
-            if vertice.name == verticeName:
-                return idx
-        return None
+        return self.vertice_name_to_index[verticeName]
 
     def getEdgeNumberByName(self, edgeName):
         for idx, edge in enumerate(self.edges):
@@ -100,9 +96,10 @@ class City:
         self.vertices = []
         self.edges = []
         self.map = []
+        self.garbage_dumps = set()
 
         # Create vertices list and name-to-index mapping
-        vertice_name_to_index = {}
+        self.vertice_name_to_index = {}
         for idx, (name, vertice_data) in enumerate(topo_data['vertices'].items()):
             vertice = Vertice(
                 name=name,
@@ -111,7 +108,9 @@ class City:
                 isGarbageDump=vertice_data['isGarbageDump']
             )
             self.vertices.append(vertice)
-            vertice_name_to_index[name] = idx
+            if(vertice.isGarbageDump):
+                self.garbage_dumps.add(idx)
+            self.vertice_name_to_index[name] = idx
 
         # Initialize adjacency list (one list per vertice)
         self.map = [[] for _ in range(len(self.vertices))]
@@ -144,8 +143,8 @@ class City:
             self.edges.append(edge)
 
             # Get vertex indices
-            first_idx = vertice_name_to_index[edge_data['firstVertice']]
-            second_idx = vertice_name_to_index[edge_data['secondVertice']]
+            first_idx = self.getVerticeNumberByName(edge_data['firstVertice'])
+            second_idx = self.getVerticeNumberByName(edge_data['firstVertice'])
 
             # Add edge to adjacency list
             self.map[first_idx].append((second_idx, idx))
@@ -277,7 +276,7 @@ class City:
                 # Only get currentEdgeLength and drive if the collector is on an edge
                 if isinstance(garbageCollector.localization, EdgeLocalization):
                     currentEdgeLength = self.edges[garbageCollector.localization.edgeNumber].length
-                    garbageCollector.drive(speed, duration, currentEdgeLength)
+                    garbageCollector.drive(speed, duration, currentEdgeLength, self.garbage_dumps)
 
     #returns edge number that leads from source to destination
     def findEdgeNumberToReachVertice(self, sourceVertice, destinationVertice):
@@ -327,21 +326,21 @@ class City:
                 edgeNumber = self.findEdgeNumberToReachVertice(currentVertice, targetVertice)
                 garbageCollector.localization = EdgeLocalization(edgeNumber, 0)
                 garbageCollector.setTargetLocalization(command.verticeLocalization)
-                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[edgeNumber])
+                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[edgeNumber], self.garbage_dumps)
 
             elif(isinstance(garbageCollector.localization, EdgeLocalization) and isinstance(command, MoveToVertice)):
                 #maybe it should be checked if edge really points at vertice?
                 garbageCollector.setTargetLocalization(command.verticeLocalization)
-                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber])
+                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber], self.garbage_dumps)
 
             elif(isinstance(garbageCollector.localization, EdgeLocalization) and isinstance(command, MoveToEdge)):
                 #maybe it should be cheked if both edges are the same
                 garbageCollector.setTargetLocalization(command.edgeLocalization)
-                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber])
+                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber], self.garbage_dumps)
 
             elif(isinstance(garbageCollector.localization, EdgeLocalization) and isinstance(command, MoveToVertice)):
                 garbageCollector.setTargetLocalization(command.verticeLocalization)
-                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber])
+                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber], self.garbage_dumps)
 
             elif(isinstance(command, EmptyBin)):
                 if(command.binLocalization.edgeLocalization == garbageCollector.localization):
