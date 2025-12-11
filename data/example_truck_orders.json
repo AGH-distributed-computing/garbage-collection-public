@@ -38,7 +38,19 @@
         },
         {
             "type": "goToVertice",
+            "destination": "skrzyzowanie4"
+        },
+        {
+            "type": "goToVertice",
+            "destination": "skrzyzowanie5"
+        },
+        {
+            "type": "goToVertice",
             "destination": "skrzyzowanie3"
+        },
+        {
+            "type": "goToVertice",
+            "destination": "skrzyzowanie2"
         },
         {
             "type": "goToEdgePlace",
@@ -78,7 +90,15 @@
         },
         {
             "type": "goToVertice",
+            "destination": "skrzyzowanie3"
+        },
+        {
+            "type": "goToVertice",
             "destination": "skrzyzowanie2"
+        },
+        {
+            "type": "goToVertice",
+            "destination": "skrzyzowanie1"
         },
         {
             "type": "goToEdgePlace",
@@ -142,6 +162,10 @@
         {
             "type": "collectGarbage",
             "side": "left"
+        },
+        {
+            "type": "goToVertice",
+            "destination": "skrzyzowanie2"
         },
         {
             "type": "goToVertice",

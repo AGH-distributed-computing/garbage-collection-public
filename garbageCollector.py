@@ -1,5 +1,4 @@
 #garbageCollector.py
-from collections import deque
 
 from localization import VerticeLocalization, EdgeLocalization, Localization
 
@@ -53,33 +52,57 @@ class GarbageCollector:
 #works only for edge to vertice or edge to edge
 #Before travel between vertices, set lcalization to point 0 on appropriate edge
 #returns time left out of duration param
-    def drive(self, speed, duration, currentEdgeLength, garbageDumps):
+    def drive(self, speed, duration, currentEdgeLength, garbageDumps, isTravelDirectionInversed):
         if(isinstance(self.localization, VerticeLocalization)):
             raise TypeError("trucks localization must be of type EdgeLocalization in order to use drive function")
-
         distanceTruckCanTravel = speed * 1000 * duration / 60
-        if(isinstance(self.targetLocalization, VerticeLocalization)):
-            if(self.localization.distanceFromStart + distanceTruckCanTravel >= currentEdgeLength):
-                travelTime = (currentEdgeLength - self.localization.distanceFromStart) / 1000 / speed * 60
-                self.localization = self.targetLocalization
-                if(self.localization.verticeNumber in garbageDumps):
-                    print(f"Garbage collector '{self.name}' reached the base. Refuelling and dumping garbage...")
-                    self.baseReached()
-                self.targetLocalization = None
-                return travelTime
-            else:
-                self.localization.distanceFromStart += distanceTruckCanTravel
-                return 0
-        elif(isinstance(self.localization, EdgeLocalization)):
-            travelDistance = self.localization.calculateDistance(self.targetLocalization)
-            travelTime = travelDistance / 1000 / speed * 60
-            if(self.localization.distanceFromStart + distanceTruckCanTravel >= travelDistance):
-                self.localization = self.targetLocalization
-                self.targetLocalization = None
-                return travelTime
-            else:
-                self.localization.distanceFromStart += distanceTruckCanTravel
-                return 0
+
+        if(isTravelDirectionInversed):
+            if(isinstance(self.targetLocalization, VerticeLocalization)):
+                if(self.localization.distanceFromStart - distanceTruckCanTravel <= 0):
+                    travelTime = self.localization.distanceFromStart / 1000 / speed * 60
+                    self.localization = self.targetLocalization
+                    if(self.localization.verticeNumber in garbageDumps):
+                        print(f"Garbage collector '{self.name}' reached the base. Refuelling and dumping garbage...")
+                        self.baseReached()
+                    self.targetLocalization = None
+                    return travelTime
+                else:
+                    self.localization.distanceFromStart -= distanceTruckCanTravel
+                    return 0
+            elif(isinstance(self.localization, EdgeLocalization)):
+                travelDistance = self.localization.distanceFromStart - self.targetLocalization.distanceFromStart
+                travelTime = travelDistance / 1000 / speed * 60
+                if(self.localization.distanceFromStart - distanceTruckCanTravel <= 0):
+                    self.localization = self.targetLocalization
+                    self.targetLocalization = None
+                    return travelTime
+                else:
+                    self.localization.distanceFromStart -= distanceTruckCanTravel
+                    return 0
+        else:
+            if(isinstance(self.targetLocalization, VerticeLocalization)):
+                if(self.localization.distanceFromStart + distanceTruckCanTravel >= currentEdgeLength):
+                    travelTime = (currentEdgeLength - self.localization.distanceFromStart) / 1000 / speed * 60
+                    self.localization = self.targetLocalization
+                    if(self.localization.verticeNumber in garbageDumps):
+                        print(f"Garbage collector '{self.name}' reached the base. Refuelling and dumping garbage...")
+                        self.baseReached()
+                    self.targetLocalization = None
+                    return travelTime
+                else:
+                    self.localization.distanceFromStart += distanceTruckCanTravel
+                    return 0
+            elif(isinstance(self.localization, EdgeLocalization)):
+                travelDistance = self.localization.calculateDistance(self.targetLocalization)
+                travelTime = travelDistance / 1000 / speed * 60
+                if(self.localization.distanceFromStart + distanceTruckCanTravel >= travelDistance):
+                    self.localization = self.targetLocalization
+                    self.targetLocalization = None
+                    return travelTime
+                else:
+                    self.localization.distanceFromStart += distanceTruckCanTravel
+                    return 0
 
     def baseReached(self):
         self.FuelLevel = self.fuelTankCapacity

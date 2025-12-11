@@ -1,7 +1,6 @@
 import heapq
 import json
 from collections import deque
-from tabnanny import verbose
 
 from command import MoveToVertice, MoveToEdge, EmptyBin
 from edge import Edge
@@ -401,28 +400,57 @@ class City:
                     targetVertice = command.verticeLocalization.verticeNumber
                     currentVertice = garbageCollector.localization.verticeNumber
                     edgeNumber = self.findEdgeNumberToReachVertice(currentVertice, targetVertice)
-                    garbageCollector.localization = EdgeLocalization(edgeNumber, 0)
+                    #if truck travels in the opposite direction than distance incrementing, we need to start with full distance
+                    if(currentVertice == self.edges[edgeNumber].secondVertice):
+                        isTravelDirectionInversed = True
+                        garbageCollector.localization = EdgeLocalization(edgeNumber, 0)
+                    else:
+                        isTravelDirectionInversed = False
+                        garbageCollector.localization = EdgeLocalization(edgeNumber, self.edges[edgeNumber].length
+                                                                         )
                     garbageCollector.setTargetLocalization(command.verticeLocalization)
-                    usedTime = garbageCollector.drive(speed, tickDuration, self.edges[edgeNumber].length, self.garbage_dumps)
+                    usedTime = garbageCollector.drive(speed, tickDuration, self.edges[edgeNumber].length, self.garbage_dumps, isTravelDirectionInversed)
 
                 elif(isinstance(garbageCollector.localization, VerticeLocalization) and isinstance(command, MoveToEdge)):
                     currentVertice = garbageCollector.localization.verticeNumber
+                    # targetVertice is the vertice at which points direction of travel
                     if(currentVertice == self.getVerticeNumberByName(self.edges[command.edgeLocalization.edgeNumber].secondVertice)):
                         targetVertice = self.getVerticeNumberByName(self.edges[command.edgeLocalization.edgeNumber].firstVertice)
+                        distance = self.edges[command.edgeLocalization.edgeNumber].length
+                        isTravelDirectionInversed = True
                     else:
                         targetVertice = self.getVerticeNumberByName(self.edges[command.edgeLocalization.edgeNumber].secondVertice)
-
+                        distance = 0
+                        isTravelDirectionInversed = False
                     edgeNumber = self.findEdgeNumberToReachVertice(currentVertice, targetVertice)
-                    garbageCollector.localization = EdgeLocalization(edgeNumber, 0)
+                    garbageCollector.localization = EdgeLocalization(edgeNumber, distance)
+                    garbageCollector.setTargetLocalization(command.edgeLocalization)
+                    usedTime = garbageCollector.drive(speed, tickDuration,
+                                                      self.edges[garbageCollector.localization.edgeNumber].length,
+                                                      self.garbage_dumps,
+                                                      isTravelDirectionInversed)
 
                 elif(isinstance(garbageCollector.localization, EdgeLocalization) and isinstance(command, MoveToEdge)):
                     #maybe it should be cheked if both edges are the same
                     garbageCollector.setTargetLocalization(command.edgeLocalization)
-                    usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber].length, self.garbage_dumps)
+                    if(garbageCollector.localization.distanceFromStart < command.edgeLocalization.distanceFromStart):
+                        isTravelDirectionInversed = False
+                    else:
+                        isTravelDirectionInversed = True
+                    usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber].length, self.garbage_dumps, isTravelDirectionInversed)
 
                 elif(isinstance(garbageCollector.localization, EdgeLocalization) and isinstance(command, MoveToVertice)):
+                    #if command.verticeLocalization is firstVertice of current edge, then set isTravelDirectionInversed = True
+                    currentEdge = self.edges[garbageCollector.localization.edgeNumber]
+                    if(self.vertices[command.verticeLocalization.verticeNumber].name == currentEdge.firstVertice):
+                        isTravelDirectionInversed = True
+                    elif(self.vertices[command.verticeLocalization.verticeNumber].name == currentEdge.secondVertice):
+                        isTravelDirectionInversed = False
+                    else:
+                        print(
+                            f"Vertice: '{self.vertices[command.verticeLocalization.verticeNumber].name}' cannot be rached directly from edge: '{self.edges[garbageCollector.localization.edgeNumber].name}'")
                     garbageCollector.setTargetLocalization(command.verticeLocalization)
-                    usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber].length, self.garbage_dumps)
+                    usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber].length, self.garbage_dumps, isTravelDirectionInversed)
 
                 self.printLocalization(garbageCollector)
 
