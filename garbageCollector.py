@@ -30,7 +30,7 @@ class GarbageCollector:
         self.targetLocalization = None
 
     def canCollectGarbage(self, litres):
-        if(self.garbageLevel + litres * self.crushingEfficiency <= self.capcity):
+        if(self.garbageLevel + litres * self.crushingEfficiency <= self.capacity):
             return True
         return False
 

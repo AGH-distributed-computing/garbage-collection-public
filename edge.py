@@ -4,7 +4,7 @@ class Edge:
     def __init__(self,
                  name,
                  length,
-                 isOneWay,
+                 isOneWay, #if set to true, only travelling from first to second vertice is allowed
                  isCollectingBothSidesAllowed,
                  firstVertice, #source vertice
                  secondVertice, #target vertice

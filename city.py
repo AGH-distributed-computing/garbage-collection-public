@@ -12,7 +12,6 @@ from rubbishBin import RubbishBin
 
 # create side array of bins basing on data from JSON
 def getBinFromData(binData):
-    location = binData['location']
     type = binData['binType']
     if (type != "detached_house"):
         if (type == "apartment_building"):
@@ -372,10 +371,15 @@ class City:
                 garbageCollector.setTargetLocalization(command.verticeLocalization)
                 usedTime = garbageCollector.drive(speed, tickDuration, self.edges[edgeNumber].length, self.garbage_dumps)
 
-            elif(isinstance(garbageCollector.localization, EdgeLocalization) and isinstance(command, MoveToVertice)):
-                #maybe it should be checked if edge really points at vertice?
-                garbageCollector.setTargetLocalization(command.verticeLocalization)
-                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber].length, self.garbage_dumps)
+            elif(isinstance(garbageCollector.localization, VerticeLocalization) and isinstance(command, MoveToEdge)):
+                currentVertice = garbageCollector.localization.verticeNumber
+                if(currentVertice == self.getVerticeNumberByName(self.edges[command.edgeLocalization.edgeNumber].secondVertice)):
+                    targetVertice = self.getVerticeNumberByName(self.edges[command.edgeLocalization.edgeNumber].firstVertice)
+                else:
+                    targetVertice = self.getVerticeNumberByName(self.edges[command.edgeLocalization.edgeNumber].secondVertice)
+
+                edgeNumber = self.findEdgeNumberToReachVertice(currentVertice, targetVertice)
+                garbageCollector.localization = EdgeLocalization(edgeNumber, 0)
 
             elif(isinstance(garbageCollector.localization, EdgeLocalization) and isinstance(command, MoveToEdge)):
                 #maybe it should be cheked if both edges are the same
@@ -392,12 +396,13 @@ class City:
                     bin = self.getBinFromEdge(self.edges[garbageCollector.localization.edgeNumber], garbageCollector.localization.distanceFromStart, command.side)
                     if bin is None:
                         print(f"WARNING: No bin found at location")
-                    if(garbageCollector.canCollectGarbage(bin.fillLevel)):
-                        garbageCollector.collectGarbage(bin.fillLevel)
-                        bin.emptyBin()
-                        usedTime += emptyBinDuration
                     else:
-                        print(f"Garbage collector: '{garbageCollector.name}' is full and could not collect additional garbage.")
+                        if(garbageCollector.canCollectGarbage(bin.fillLevel)):
+                            garbageCollector.collectGarbage(bin.fillLevel)
+                            bin.emptyBin()
+                            usedTime += emptyBinDuration
+                        else:
+                            print(f"Garbage collector: '{garbageCollector.name}' is full and could not collect additional garbage.")
                 else:
                     self.garbage_collector_commands[truck].appendleft(command)
 
