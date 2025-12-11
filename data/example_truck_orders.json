@@ -1,0 +1,182 @@
+{
+    "truckName": "Mercedes",
+    "commands": [
+        {
+            "type": "goToVertice",
+            "destination": "skrzyzowanie4"
+        },
+        {
+            "type": "goToVertice",
+            "destination": "skrzyzowanie5"
+        },
+        {
+            "type": "goToEdgePlace",
+            "edge": "Parkowa",
+            "distance": 250
+        },
+        {
+            "type": "collectGarbage",
+            "side": "right"
+        },
+        {
+            "type": "goToEdgePlace",
+            "edge": "Parkowa",
+            "distance": 600
+        },
+        {
+            "type": "collectGarbage",
+            "side": "right"
+        },
+        {
+            "type": "goToEdgePlace",
+            "edge": "Parkowa",
+            "distance": 1000
+        },
+        {
+            "type": "collectGarbage",
+            "side": "right"
+        },
+        {
+            "type": "goToVertice",
+            "destination": "skrzyzowanie3"
+        },
+        {
+            "type": "goToEdgePlace",
+            "edge": "Przemysłowa",
+            "distance": 300
+        },
+        {
+            "type": "collectGarbage",
+            "side": "right"
+        },
+        {
+            "type": "goToEdgePlace",
+            "edge": "Przemysłowa",
+            "distance": 900
+        },
+        {
+            "type": "collectGarbage",
+            "side": "right"
+        },
+        {
+            "type": "goToEdgePlace",
+            "edge": "Przemysłowa",
+            "distance": 1200
+        },
+        {
+            "type": "collectGarbage",
+            "side": "right"
+        },
+        {
+            "type": "goToEdgePlace",
+            "edge": "Przemysłowa",
+            "distance": 1800
+        },
+        {
+            "type": "collectGarbage",
+            "side": "right"
+        },
+        {
+            "type": "goToVertice",
+            "destination": "skrzyzowanie2"
+        },
+        {
+            "type": "goToEdgePlace",
+            "edge": "Główna",
+            "distance": 200
+        },
+        {
+            "type": "collectGarbage",
+            "side": "right"
+        },
+        {
+            "type": "goToEdgePlace",
+            "edge": "Główna",
+            "distance": 400
+        },
+        {
+            "type": "collectGarbage",
+            "side": "right"
+        },
+        {
+            "type": "goToEdgePlace",
+            "edge": "Główna",
+            "distance": 800
+        },
+        {
+            "type": "collectGarbage",
+            "side": "right"
+        },
+        {
+            "type": "goToEdgePlace",
+            "edge": "Główna",
+            "distance": 1200
+        },
+        {
+            "type": "collectGarbage",
+            "side": "right"
+        },
+        {
+            "type": "goToEdgePlace",
+            "edge": "Główna",
+            "distance": 300
+        },
+        {
+            "type": "collectGarbage",
+            "side": "left"
+        },
+        {
+            "type": "goToEdgePlace",
+            "edge": "Główna",
+            "distance": 600
+        },
+        {
+            "type": "collectGarbage",
+            "side": "left"
+        },
+        {
+            "type": "goToEdgePlace",
+            "edge": "Główna",
+            "distance": 1000
+        },
+        {
+            "type": "collectGarbage",
+            "side": "left"
+        },
+        {
+            "type": "goToVertice",
+            "destination": "skrzyzowanie1"
+        },
+        {
+            "type": "goToEdgePlace",
+            "edge": "Dojazdowa",
+            "distance": 400
+        },
+        {
+            "type": "collectGarbage",
+            "side": "right"
+        },
+        {
+            "type": "goToEdgePlace",
+            "edge": "Dojazdowa",
+            "distance": 800
+        },
+        {
+            "type": "collectGarbage",
+            "side": "right"
+        },
+        {
+            "type": "goToEdgePlace",
+            "edge": "Dojazdowa",
+            "distance": 1400
+        },
+        {
+            "type": "collectGarbage",
+            "side": "right"
+        },
+        {
+            "type": "goToVertice",
+            "destination": "wysypisko"
+        }
+    ]
+}
