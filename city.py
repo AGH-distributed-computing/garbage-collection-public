@@ -321,13 +321,16 @@ class City:
 
     #returns edge number that leads from source to destination
     def findEdgeNumberToReachVertice(self, sourceVertice, destinationVertice):
-        if(sourceVertice not in self.map):
+        if(sourceVertice < 0 or sourceVertice >= len(self.map)):
             print(f"Vertice with number '{sourceVertice}' not found.")
+            return None
+        if destinationVertice < 0 or destinationVertice >= len(self.vertices):
+            print("Destination vertice does not exist")
             return None
         for (verticeNumber, edgeNumber) in self.map[sourceVertice]:
             if(verticeNumber == destinationVertice):
                 return edgeNumber
-        print(f"Vertice connecting '{sourceVertice}' and '{destinationVertice}' not found.")
+        print(f"Edge connecting '{sourceVertice}' and '{destinationVertice}' not found.")
         return None
 
     def setTruckToTravelFromVerticeToVertice(self, garbageCollector, destinationVertice):
@@ -367,26 +370,28 @@ class City:
                 edgeNumber = self.findEdgeNumberToReachVertice(currentVertice, targetVertice)
                 garbageCollector.localization = EdgeLocalization(edgeNumber, 0)
                 garbageCollector.setTargetLocalization(command.verticeLocalization)
-                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[edgeNumber], self.garbage_dumps)
+                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[edgeNumber].length, self.garbage_dumps)
 
             elif(isinstance(garbageCollector.localization, EdgeLocalization) and isinstance(command, MoveToVertice)):
                 #maybe it should be checked if edge really points at vertice?
                 garbageCollector.setTargetLocalization(command.verticeLocalization)
-                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber], self.garbage_dumps)
+                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber].length, self.garbage_dumps)
 
             elif(isinstance(garbageCollector.localization, EdgeLocalization) and isinstance(command, MoveToEdge)):
                 #maybe it should be cheked if both edges are the same
                 garbageCollector.setTargetLocalization(command.edgeLocalization)
-                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber], self.garbage_dumps)
+                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber].length, self.garbage_dumps)
 
             elif(isinstance(garbageCollector.localization, EdgeLocalization) and isinstance(command, MoveToVertice)):
                 garbageCollector.setTargetLocalization(command.verticeLocalization)
-                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber], self.garbage_dumps)
+                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber].length, self.garbage_dumps)
 
             #change garbage collecting check if there is a bin at current location and if is, collecting it instead of requiring location
             elif (isinstance(command, EmptyBin)):
                 if (timeLeft >= emptyBinDuration):  # if there's no time left for emptying the bin, we cannot do it
                     bin = self.getBinFromEdge(self.edges[garbageCollector.localization.edgeNumber], garbageCollector.localization.distanceFromStart, command.side)
+                    if bin is None:
+                        print(f"WARNING: No bin found at location")
                     if(garbageCollector.canCollectGarbage(bin.fillLevel)):
                         garbageCollector.collectGarbage(bin.fillLevel)
                         bin.emptyBin()
