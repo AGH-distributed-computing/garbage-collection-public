@@ -1,6 +1,7 @@
 import heapq
 import json
 from collections import deque
+from tabnanny import verbose
 
 from command import MoveToVertice, MoveToEdge, EmptyBin
 from edge import Edge
@@ -119,7 +120,8 @@ class City:
                 return idx
         return None
 
-    def __init__(self, topographyFilePath, carFilePath):
+    def __init__(self, topographyFilePath, carFilePath, verbose=False):
+        self.verbose = verbose
         # Load JSON data
         try:
             with open(topographyFilePath, 'r', encoding='utf-8') as f:
@@ -332,6 +334,14 @@ class City:
         print(f"Edge connecting '{sourceVertice}' and '{destinationVertice}' not found.")
         return None
 
+    def printLocalization(self, garbageCollector):
+        if(self.verbose):
+            print(f"Vehicle: '{garbageCollector.name}' is now at:")
+            if(isinstance(garbageCollector.localization, VerticeLocalization)):
+                print(f"intersection: '{self.vertices[garbageCollector.localization.verticeNumber].name}'")
+            elif(isinstance(garbageCollector.localization, EdgeLocalization)):
+                print(f"street: '{self.edges[garbageCollector.localization.edgeNumber].name}' on meter: '{garbageCollector.localization.distanceFromStart}'")
+
     def setTruckToTravelFromVerticeToVertice(self, garbageCollector, destinationVertice):
         if isinstance(garbageCollector.localization, VerticeLocalization):
             currentVertice = garbageCollector.localization.verticeNumber
@@ -362,36 +372,11 @@ class City:
             garbageCollector = self.garbage_collectors[truck]
             command = self.garbage_collector_commands[truck].popleft()
             usedTime = 0
-            #drive method from GarbageCollector has no idea about graph structure, so we place truck on point 0 on appropriate edge
-            if(isinstance(garbageCollector.localization, VerticeLocalization) and isinstance(command, MoveToVertice)):
-                targetVertice = command.verticeLocalization.verticeNumber
-                currentVertice = garbageCollector.localization.verticeNumber
-                edgeNumber = self.findEdgeNumberToReachVertice(currentVertice, targetVertice)
-                garbageCollector.localization = EdgeLocalization(edgeNumber, 0)
-                garbageCollector.setTargetLocalization(command.verticeLocalization)
-                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[edgeNumber].length, self.garbage_dumps)
 
-            elif(isinstance(garbageCollector.localization, VerticeLocalization) and isinstance(command, MoveToEdge)):
-                currentVertice = garbageCollector.localization.verticeNumber
-                if(currentVertice == self.getVerticeNumberByName(self.edges[command.edgeLocalization.edgeNumber].secondVertice)):
-                    targetVertice = self.getVerticeNumberByName(self.edges[command.edgeLocalization.edgeNumber].firstVertice)
-                else:
-                    targetVertice = self.getVerticeNumberByName(self.edges[command.edgeLocalization.edgeNumber].secondVertice)
-
-                edgeNumber = self.findEdgeNumberToReachVertice(currentVertice, targetVertice)
-                garbageCollector.localization = EdgeLocalization(edgeNumber, 0)
-
-            elif(isinstance(garbageCollector.localization, EdgeLocalization) and isinstance(command, MoveToEdge)):
-                #maybe it should be cheked if both edges are the same
-                garbageCollector.setTargetLocalization(command.edgeLocalization)
-                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber].length, self.garbage_dumps)
-
-            elif(isinstance(garbageCollector.localization, EdgeLocalization) and isinstance(command, MoveToVertice)):
-                garbageCollector.setTargetLocalization(command.verticeLocalization)
-                usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber].length, self.garbage_dumps)
+            self.printLocalization(garbageCollector)
 
             #change garbage collecting check if there is a bin at current location and if is, collecting it instead of requiring location
-            elif (isinstance(command, EmptyBin)):
+            if(isinstance(command, EmptyBin)):
                 if (timeLeft >= emptyBinDuration):  # if there's no time left for emptying the bin, we cannot do it
                     bin = self.getBinFromEdge(self.edges[garbageCollector.localization.edgeNumber], garbageCollector.localization.distanceFromStart, command.side)
                     if bin is None:
@@ -401,10 +386,45 @@ class City:
                             garbageCollector.collectGarbage(bin.fillLevel)
                             bin.emptyBin()
                             usedTime += emptyBinDuration
+                            if(self.verbose):
+                                print(
+                                    f"Garbage collector: '{garbageCollector.name}' collected '{bin.fillLevel} litres of garbage'.")
                         else:
                             print(f"Garbage collector: '{garbageCollector.name}' is full and could not collect additional garbage.")
                 else:
                     self.garbage_collector_commands[truck].appendleft(command)
+            else:
+                if(self.verbose):
+                    print(f"Garbage collector: '{garbageCollector.name}' travelling")
+                #drive method from GarbageCollector has no idea about graph structure, so we place truck on point 0 on appropriate edge
+                if(isinstance(garbageCollector.localization, VerticeLocalization) and isinstance(command, MoveToVertice)):
+                    targetVertice = command.verticeLocalization.verticeNumber
+                    currentVertice = garbageCollector.localization.verticeNumber
+                    edgeNumber = self.findEdgeNumberToReachVertice(currentVertice, targetVertice)
+                    garbageCollector.localization = EdgeLocalization(edgeNumber, 0)
+                    garbageCollector.setTargetLocalization(command.verticeLocalization)
+                    usedTime = garbageCollector.drive(speed, tickDuration, self.edges[edgeNumber].length, self.garbage_dumps)
+
+                elif(isinstance(garbageCollector.localization, VerticeLocalization) and isinstance(command, MoveToEdge)):
+                    currentVertice = garbageCollector.localization.verticeNumber
+                    if(currentVertice == self.getVerticeNumberByName(self.edges[command.edgeLocalization.edgeNumber].secondVertice)):
+                        targetVertice = self.getVerticeNumberByName(self.edges[command.edgeLocalization.edgeNumber].firstVertice)
+                    else:
+                        targetVertice = self.getVerticeNumberByName(self.edges[command.edgeLocalization.edgeNumber].secondVertice)
+
+                    edgeNumber = self.findEdgeNumberToReachVertice(currentVertice, targetVertice)
+                    garbageCollector.localization = EdgeLocalization(edgeNumber, 0)
+
+                elif(isinstance(garbageCollector.localization, EdgeLocalization) and isinstance(command, MoveToEdge)):
+                    #maybe it should be cheked if both edges are the same
+                    garbageCollector.setTargetLocalization(command.edgeLocalization)
+                    usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber].length, self.garbage_dumps)
+
+                elif(isinstance(garbageCollector.localization, EdgeLocalization) and isinstance(command, MoveToVertice)):
+                    garbageCollector.setTargetLocalization(command.verticeLocalization)
+                    usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber].length, self.garbage_dumps)
+
+                self.printLocalization(garbageCollector)
 
             timeLeft -= usedTime
             heapq.heappush(heap, (-timeLeft, truck))
