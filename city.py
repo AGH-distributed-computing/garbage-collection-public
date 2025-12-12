@@ -298,27 +298,6 @@ class City:
         for garbage_collector in self.garbage_collectors:
             garbage_collector.consumeFuel(minutes)
 
-    def moveAllGarbageCollectors(self, speed, duration):
-        for garbageCollector in self.garbage_collectors:
-            if garbageCollector.targetLocalization != None:  # if current truck has no target, we skip it
-                if (isinstance(garbageCollector.localization,
-                               VerticeLocalization)):  # drive function accepts only edge-vertice or edge-edge, so we need to set appropriate with distanceFromStart equal to 0
-                    targetEdgeNumber = None
-                    targetVertice = garbageCollector.targetLocalization.verticeNumber
-                    for (verticeNumber, edgeNumber) in self.map[garbageCollector.localization.verticeNumber]:
-                        if verticeNumber == targetVertice:
-                            targetEdgeNumber = edgeNumber
-                    if (targetEdgeNumber is None):
-                        raise TypeError(
-                            "Target vertice is not adjacent to source vertice!")
-                    targetLocalization = EdgeLocalization(targetEdgeNumber, 0)
-                    garbageCollector.setTargetLocalization(targetLocalization)
-
-                # Only get currentEdgeLength and drive if the collector is on an edge
-                if isinstance(garbageCollector.localization, EdgeLocalization):
-                    currentEdgeLength = self.edges[garbageCollector.localization.edgeNumber].length
-                    garbageCollector.drive(speed, duration, currentEdgeLength, self.garbage_dumps)
-
     #returns edge number that leads from source to destination
     def findEdgeNumberToReachVertice(self, sourceVertice, destinationVertice):
         if(sourceVertice < 0 or sourceVertice >= len(self.map)):
@@ -360,7 +339,7 @@ class City:
         while heap:
             neg_timeLeft, truck = heapq.heappop(heap)
             timeLeft = -neg_timeLeft
-            if timeLeft == 0:
+            if timeLeft <= 0:
                 break
 
             #tu wykonac pojedynczy ruch z poczatku kolejki
@@ -369,6 +348,8 @@ class City:
             #typu canExecuteOrder
             #w zasadzie problem jest tylko ze smieciami (bo jazda zawsze powinna wyzerować) wiec mozna dorobic if time < emptyBinDuration and nextOrder ==emptyBin
             garbageCollector = self.garbage_collectors[truck]
+            if(self.garbage_collector_commands[truck].__len__() == 0):
+                continue
             command = self.garbage_collector_commands[truck].popleft()
             usedTime = 0
 
@@ -388,9 +369,12 @@ class City:
                             if(self.verbose):
                                 print(
                                     f"Garbage collector: '{garbageCollector.name}' collected '{bin.fillLevel} litres of garbage'.")
+                            timeLeft -= usedTime
+                            heapq.heappush(heap, (-timeLeft, truck))
                         else:
                             print(f"Garbage collector: '{garbageCollector.name}' is full and could not collect additional garbage.")
                 else:
+                    #instead of postponing emptying the bin we should be able to divide it between two ticks
                     self.garbage_collector_commands[truck].appendleft(command)
             else:
                 if(self.verbose):
@@ -453,31 +437,10 @@ class City:
                     usedTime = garbageCollector.drive(speed, tickDuration, self.edges[garbageCollector.localization.edgeNumber].length, self.garbage_dumps, isTravelDirectionInversed)
 
                 self.printLocalization(garbageCollector)
+                timeLeft -= usedTime
+                heapq.heappush(heap, (-timeLeft, truck))
 
-            timeLeft -= usedTime
-            heapq.heappush(heap, (-timeLeft, truck))
 
-
-    #Allows to plan journey to adjacent vertice
-    def orderTruckMovementToVertice(self, garbageCollectorName, verticeName):
-        verticeNumber = self.getVerticeByName(verticeName)
-        if(verticeNumber is None):
-            print(f"Vertice with name {verticeName} not found!")
-            return
-        garbageCollector = self.getGarbageCollectorByName(garbageCollectorName)
-        currentLocalization = garbageCollector.localization
-        currentEdge = None
-        if(isinstance(currentLocalization, EdgeLocalization)):
-            currentEdge = currentLocalization.edgeNumber
-        else:
-            print("This function allows orders only one step ahead")
-            return
-        if(self.edges[currentEdge].secondVertice == verticeNumber):
-            verticeDestination = VerticeLocalization(verticeNumber)
-            garbageCollector.setTargetLocalization(verticeDestination)
-        else:
-            print(f"Vertice with name {verticeName} is not adjacent to road, on which truck is!")
-            return
 
     #function returning bin by localization and side of the road, binLocalization is an instance of EdgeLocalization class
     def getBinByLocalization(self, binLocalization, binSide):
