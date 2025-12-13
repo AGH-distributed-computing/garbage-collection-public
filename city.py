@@ -38,6 +38,16 @@ def getBinFromData(binData):
 
 class City:
 
+#method returns data about all trucks
+    def getAllTrucksStatus(self):
+        trucks_data = {"trucks": {}}
+
+        for truck in self.garbage_collectors:
+            truck_status_json = self.getTruckStatus(truck.name)
+            truck_status_dict = json.loads(truck_status_json)
+            trucks_data["trucks"].update(truck_status_dict)
+
+        return json.dumps(trucks_data, indent=4)
 
 # method returns rubbish bin data on a street given by streetName parameter
 #in json similar to rightSideBins and leftSideBins in topography json
