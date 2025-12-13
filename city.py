@@ -38,6 +38,50 @@ def getBinFromData(binData):
 
 class City:
 
+#returns truck parameters by name, in json similar to input file
+    def getTruckStatus(self, truckName):
+        truckNumber = self.getGarbageCollectorNumberByName(truckName)
+
+        if truckNumber is None:
+            raise ValueError(f"Truck with name '{truckName}' not found")
+
+        truck = self.garbage_collectors[truckNumber]
+
+        truck_status = {
+            truckName: {
+                "fuelTankCapacity": truck.fuelTankCapacity,
+                "fuelConsumption": truck.fuelConsumption,
+                "fuelLevel": truck.fuelLevel,
+                "capacity": truck.capacity,
+                "crushingEfficiency": truck.crushingEfficiency,
+                "timeSinceStart": truck.timeSinceStart,
+                "garbageLevel": truck.garbageLevel
+            }
+        }
+
+        if isinstance(truck.localization, VerticeLocalization):
+            vertice_name = self.vertices[truck.localization.verticeNumber].name
+            truck_status[truckName]["verticeLocalization"] = vertice_name
+        elif isinstance(truck.localization, EdgeLocalization):
+            edge_name = self.edges[truck.localization.edgeNumber].name
+            truck_status[truckName]["edgeLocalization"] = {
+                "edgeName": edge_name,
+                "distanceFromStart": truck.localization.distanceFromStart
+            }
+
+        if isinstance(truck.targetLocalization, VerticeLocalization):
+            vertice_name = self.vertices[truck.targetLocalization.verticeNumber].name
+            truck_status[truckName]["verticeDestinationLocalization"] = vertice_name
+        elif isinstance(truck.targetLocalization, EdgeLocalization):
+            edge_name = self.edges[truck.targetLocalization.edgeNumber].name
+            truck_status[truckName]["edgeDestinationLocalization"] = {
+                "edgeName": edge_name,
+                "distanceFromStart": truck.localization.distanceFromStart
+            }
+
+        return json.dumps(truck_status, indent=4)
+
+
 #allows to get truck's route
     def getTruckOrdersAsJson(self, truckName):
         truckNumber = self.getGarbageCollectorNumberByName(truckName)
