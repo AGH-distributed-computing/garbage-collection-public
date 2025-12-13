@@ -32,4 +32,7 @@ class RubbishBinSide(str, Enum):
         except ValueError:
             raise ValueError("Side must be either left or right!")
 
+    def to_string(self) -> str:
+        return self.value
+
 Localization = Union[VerticeLocalization, EdgeLocalization]

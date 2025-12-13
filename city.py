@@ -38,6 +38,45 @@ def getBinFromData(binData):
 
 class City:
 
+#allows to get truck's route
+    def getTruckOrdersAsJson(self, truckName):
+        truckNumber = self.getGarbageCollectorNumberByName(truckName)
+
+        if truckNumber is None:
+            raise ValueError(f"Truck with name '{truckName}' not found")
+
+        commands_list = []
+
+        for cmd in self.garbage_collector_commands[truckNumber]:
+
+            if isinstance(cmd, MoveToVertice):
+                vertice_name = self.vertices[cmd.verticeLocalization.verticeNumber].name
+                commands_list.append({
+                    "type": "goToVertice",
+                    "destination": vertice_name
+                })
+
+            elif isinstance(cmd, MoveToEdge):
+                edge_name = self.edges[cmd.edgeLocalization.edgeNumber].name
+                commands_list.append({
+                    "type": "goToEdgePlace",
+                    "edge": edge_name,
+                    "distance": cmd.edgeLocalization.distanceFromStart
+                })
+
+            elif isinstance(cmd, EmptyBin):
+                commands_list.append({
+                    "type": "collectGarbage",
+                    "side": cmd.side.to_string()
+                })
+
+        result = {
+            "truckName": truckName,
+            "commands": commands_list
+        }
+
+        return json.dumps(result, indent=4)
+
     #takes string in json format and adds its commands
     def parseOrdersForTruck(self, jsonOrders):
         data = json.loads(jsonOrders)
