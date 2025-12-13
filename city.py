@@ -38,6 +38,61 @@ def getBinFromData(binData):
 
 class City:
 
+
+# method returns rubbish bin data on a street given by streetName parameter
+#in json similar to rightSideBins and leftSideBins in topography json
+# side and location parameters are optional
+# if side parameter givrn, it looks only at left/right side
+# location is distance from firstVertice
+    def getBinsStatus(self, streetName, side=None, location=None):
+        edgeNumber = self.getEdgeNumberByName(streetName)
+
+        if edgeNumber is None:
+            raise ValueError(f"Street with name '{streetName}' not found")
+
+        edge = self.edges[edgeNumber]
+
+        result = {streetName: {}}
+
+        # Helper function to create bin data
+        def create_bin_data(bin_obj, loc):
+            bin_data = {
+                "location": loc,
+                "binType": bin_obj.type.value,
+                "capacity": bin_obj.capacity,
+                "fillLevel": bin_obj.fillLevel,
+                "usersCount": bin_obj.usersCount
+            }
+            return bin_data
+
+        if side is None or side == "right":
+            right_bins = []
+            if location is None:
+                for loc, bin_obj in sorted(edge.rightSideBins.items()):
+                    right_bins.append(create_bin_data(bin_obj, loc))
+            else:
+                if location in edge.rightSideBins:
+                    bin_obj = edge.rightSideBins[location]
+                    right_bins.append(create_bin_data(bin_obj, location))
+
+            if right_bins:
+                result[streetName]["rightSideBins"] = right_bins
+
+        if side is None or side == "left":
+            left_bins = []
+            if location is None:
+                for loc, bin_obj in sorted(edge.leftSideBins.items()):
+                    left_bins.append(create_bin_data(bin_obj, loc))
+            else:
+                if location in edge.leftSideBins:
+                    bin_obj = edge.leftSideBins[location]
+                    left_bins.append(create_bin_data(bin_obj, location))
+
+            if left_bins:
+                result[streetName]["leftSideBins"] = left_bins
+
+        return json.dumps(result, indent=4)
+
 #returns truck parameters by name, in json similar to input file
     def getTruckStatus(self, truckName):
         truckNumber = self.getGarbageCollectorNumberByName(truckName)
@@ -534,8 +589,4 @@ class City:
         else:
             print("Localization of the bin must be of EdgeLocalization type")
 
-#Allow to plan journey to point on edge
-#distance parameter is the distance from sorce vertice
-#    def OrderTruckMovementToEdge(self, garbageCollectorName, edgeName, distance)
-        #jezeli truck jest w wierzcholku, pamietac zmienic na zerowa odleglosc na krawedzi wchodzacej do wierzcholka docelowego
 
