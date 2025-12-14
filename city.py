@@ -679,3 +679,38 @@ class City:
             })
 
         return json.dumps(alert_bins_list, indent=4)
+
+#takes json very similar to setAlertLevels, but without alertLevel
+    def removeAlertLevels(self, binsJson):
+        try:
+            bins_data = json.loads(binsJson)
+        except json.JSONDecodeError as e:
+            print(f"Invalid JSON format.")
+            print(f"Details: {e}")
+            raise
+
+        for bin_config in bins_data:
+            street_name = bin_config.get("streetName")
+            location = bin_config.get("location")
+            side = bin_config.get("side")
+
+            if(street_name is None or location is None or side is None):
+                print(f"Warning: Skipping incomplete bin configuration: {bin_config}")
+                continue
+
+            edge_number = self.getEdgeNumberByName(street_name)
+            if edge_number is None:
+                print(f"Warning: Street '{street_name}' not found.")
+                continue
+
+            bin_localization = EdgeLocalization(edge_number, location)
+            bin_obj = self.getBinByLocalization(bin_localization, side)
+
+            if bin_obj is None:
+                print(f"Warning: Bin at street '{street_name}', location {location}, side '{side}' not found.")
+                continue
+
+            if self.verbose and bin_obj.alertLevel is not None:
+                print(f"Removed alert from bin at: '{street_name}', location {location}, side '{side}'")
+
+            bin_obj.alertLevel = None
