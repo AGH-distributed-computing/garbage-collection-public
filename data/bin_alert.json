@@ -1,0 +1,20 @@
+[
+	{
+		"streetName": "Osiedlowa",
+		"location": 300,
+		"side": "left",
+		"alertLevel": 0.8
+	},
+	{
+		"streetName": "Centralna",
+		"location": 700,
+		"side": "right",
+		"alertLevel": 0.8
+	},
+	{
+		"streetName": "Parkowa",
+		"location": 400,
+		"side": "left",
+		"alertLevel": 0.9
+	}
+]
