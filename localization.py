@@ -1,4 +1,5 @@
 #localization.py
+from dataclasses import dataclass
 from enum import Enum
 from typing import Union
 
@@ -36,3 +37,9 @@ class RubbishBinSide(str, Enum):
         return self.value
 
 Localization = Union[VerticeLocalization, EdgeLocalization]
+
+
+@dataclass(frozen=True)
+class FrozenEdgeLocalization:
+    edgeNumber: int
+    distanceFromStart: float

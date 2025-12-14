@@ -1,6 +1,9 @@
 #rubbishBin.py
-
+from dataclasses import dataclass
 from enum import Enum
+
+from localization import FrozenEdgeLocalization
+
 
 class RubbishBinType(str, Enum):
     DETACHED_HOUSE = "detached_house"
@@ -24,11 +27,19 @@ class RubbishBin:
         self.capacity = capacity #max capacity in litres
         self.usersCount = usersCount
         self.fillLevel = fillLevel #current fill level in litres
+        self.alertLevel = None
 
     def emptyBin(self):
         fillLevel = self.fillLevel
         self.fillLevel = 0
         return fillLevel
+
+    def isAlertLevelExceeded(self):
+        if(self.alertLevel is None):
+            return False
+        if(self.fillLevel > self.capacity*self.alertLevel):
+            return True
+        return False
 
 #as written in presentation, we don't care what happens with extra garbage after bin is full, so we use mod
     def updateRubbish(self,
@@ -48,3 +59,9 @@ class RubbishBin:
             self.fillLevel += apartment_building_time_series[series_index]
 
         self.fillLevel %= self.capacity
+
+#this class allows fast add/remove operations
+@dataclass(frozen=True)
+class AlertBin:
+    location: FrozenEdgeLocalization
+    side: str

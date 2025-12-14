@@ -5,9 +5,9 @@ from collections import deque
 from command import MoveToVertice, MoveToEdge, EmptyBin
 from edge import Edge
 from garbageCollector import GarbageCollector
-from localization import VerticeLocalization, EdgeLocalization, RubbishBinSide
+from localization import VerticeLocalization, EdgeLocalization, RubbishBinSide, FrozenEdgeLocalization
 from vertice import Vertice
-from rubbishBin import RubbishBin
+from rubbishBin import RubbishBin, AlertBin
 
 
 # create side array of bins basing on data from JSON
@@ -37,6 +37,7 @@ def getBinFromData(binData):
 
 
 class City:
+
 
 #method returns data about all trucks
     def getAllTrucksStatus(self):
@@ -355,6 +356,8 @@ class City:
 
         self.garbage_collectors = []
         self.garbage_collector_commands = []
+        #this set is meant to store data about bins, where alert level is exceeded
+        self.alert_bin_locations: set[AlertBin] = set()
 
         for truck_name, truck_data in truck_data_json['trucks'].items():
             # Determine localization type
@@ -424,8 +427,10 @@ class City:
                       current_time
                       ):
         series_index = (current_time % time_series_duration) // tick_duration
-        for edge in self.edges:
-            for rubbishBin in edge.rightSideBins.values():
+        for edgeNumber in range(len(self.edges)):
+            edge = self.edges[edgeNumber]
+            for distance in edge.rightSideBins.keys():
+                rubbishBin = edge.rightSideBins[distance]
                 rubbishBin.updateRubbish(
                     detached_house_time_series,
                     apartment_building_time_series,
@@ -433,7 +438,16 @@ class City:
                     production_plant_time_series,
                     series_index
                 )
-            for rubbishBin in edge.leftSideBins.values():
+                if(rubbishBin.isAlertLevelExceeded()):
+                    binLocation = FrozenEdgeLocalization(edgeNumber, distance)
+                    alertBin = AlertBin(
+                            location=binLocation,
+                            side="right"
+                        )
+                    self.alert_bin_locations.add(alertBin)
+
+            for distance in edge.leftSideBins.keys():
+                rubbishBin = edge.leftSideBins[distance]
                 rubbishBin.updateRubbish(
                     detached_house_time_series,
                     apartment_building_time_series,
@@ -441,6 +455,14 @@ class City:
                     production_plant_time_series,
                     series_index
                 )
+                if (rubbishBin.isAlertLevelExceeded()):
+                    binLocation = FrozenEdgeLocalization(edgeNumber, distance)
+                    alertBin = AlertBin(
+                        location=binLocation,
+                        side="left"
+                    )
+                    self.alert_bin_locations.add(alertBin)
+
 
     def decreaseAllFuel(self, minutes):
         for garbage_collector in self.garbage_collectors:
@@ -514,6 +536,14 @@ class City:
                             garbageCollector.collectGarbage(bin.fillLevel)
                             bin.emptyBin()
                             usedTime += emptyBinDuration
+                            #Here we remove bin from set of bins where alert level is exceeded, because bin was emptied
+                            # Only try to remove if the bin was actually in the alert set
+                            self.alert_bin_locations.discard(
+                                AlertBin(FrozenEdgeLocalization(
+                                    garbageCollector.localization.edgeNumber,
+                                    garbageCollector.localization.distanceFromStart
+                                ), command.side.to_string())
+                            )
                             if(self.verbose):
                                 print(
                                     f"Garbage collector: '{garbageCollector.name}' collected '{bin.fillLevel} litres of garbage'.")
@@ -599,4 +629,53 @@ class City:
         else:
             print("Localization of the bin must be of EdgeLocalization type")
 
+#alertLevel is a float between 0 and 1. Setting to 1 means that alert shall be sent when bin is full
+#example json to sent to function is in bin_alert.json file
+    def setAlertLevels(self, binsJson):
+        try:
+            bins_data = json.loads(binsJson)
+        except json.JSONDecodeError as e:
+            print(f"Invalid JSON format.")
+            print(f"Details: {e}")
+            raise
 
+        for bin_config in bins_data:
+            street_name = bin_config.get("streetName")
+            location = bin_config.get("location")
+            side = bin_config.get("side")
+            alert_level = bin_config.get("alertLevel")
+
+            if(street_name is None or location is None or side is None or alert_level is None):
+                print(f"Warning: Skipping incomplete bin configuration: {bin_config}")
+                continue
+
+            edge_number = self.getEdgeNumberByName(street_name)
+            if edge_number is None:
+                print(f"Warning: Street '{street_name}' not found.")
+                continue
+
+            bin_localization = EdgeLocalization(edge_number, location)
+            bin_obj = self.getBinByLocalization(bin_localization, side)
+
+            if bin_obj is None:
+                print(f"Warning: Bin at street '{street_name}', location {location}, side '{side}' not found.")
+                continue
+
+            bin_obj.alertLevel = alert_level
+
+            if self.verbose:
+                print(f"Alert level set to {alert_level} for bin at '{street_name}', location {location}, side '{side}'")
+
+
+    def getAlertBins(self):
+        alert_bins_list = []
+
+        for alert_bin in self.alert_bin_locations:
+            edge_name = self.edges[alert_bin.location.edgeNumber].name
+            alert_bins_list.append({
+                "streetName": edge_name,
+                "distance": alert_bin.location.distanceFromStart,
+                "side": alert_bin.side
+            })
+
+        return json.dumps(alert_bins_list, indent=4)
