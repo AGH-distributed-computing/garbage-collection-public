@@ -1,0 +1,38 @@
+[
+	{
+		"streetName": "Główna",
+		"distance": 300,
+		"side": "right",
+		"day": 0,
+		"hour": 16,
+		"minute": 54,
+		"rubbishLiters": 5000
+	},
+	{
+		"streetName": "Dojazdowa",
+		"distance": 500,
+		"side": "right",
+		"day": 7,
+		"hour": 16,
+		"minute": 25,
+		"rubbishLiters": 3000
+	},
+	{
+		"streetName": "Parkowa",
+		"distance": 2000,
+		"side": "left",
+		"day": 14,
+		"hour": 20,
+		"minute": 30,
+		"rubbishLiters": 5000
+	},
+	{
+		"streetName": "Główna",
+		"distance": 2200,
+		"side": "left",
+		"day": 30,
+		"hour": 20,
+		"minute": 30,
+		"rubbishLiters": 2000
+	}
+]
