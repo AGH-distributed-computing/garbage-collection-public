@@ -10,6 +10,7 @@ class RubbishBinType(str, Enum):
     APARTMENT_BUILDING = "apartment_building"
     PUBLIC_FACILITY = "public_facility"
     PRODUCTION_PLANT = "production_plant"
+    EVENT_DUMP = "event_dump"
 
     @classmethod
     def from_string(cls, value: str) -> "RubbishBinType":
@@ -22,12 +23,13 @@ class RubbishBinType(str, Enum):
             )
 
 class RubbishBin:
-    def __init__(self, type, capacity, usersCount, fillLevel = 0):
+    def __init__(self, type, capacity, usersCount, fillLevel = 0, isTemporary = False):
         self.type = RubbishBinType.from_string(type)
         self.capacity = capacity #max capacity in litres
         self.usersCount = usersCount
         self.fillLevel = fillLevel #current fill level in litres
         self.alertLevel = None
+        self.isTemporary = isTemporary
 
     def emptyBin(self):
         fillLevel = self.fillLevel

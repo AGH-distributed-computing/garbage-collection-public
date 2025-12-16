@@ -56,6 +56,17 @@ except FileNotFoundError:
     print(f"Error: File '{filepath}' not found")
     raise
 
+filepath = "data/events.json"
+
+try:
+    with open(filepath, 'r', encoding='utf-8') as file:
+        json_string = file.read()
+
+    city.getEventsFromJson(json_string)
+except FileNotFoundError:
+    print(f"Error: File '{filepath}' not found")
+    raise
+
 #we calculate fuel consumption by hours, so at each loop iteration fuel should be decreased
 while running:
     city.updateRubbish(detached_house_time_series,
@@ -68,7 +79,7 @@ while running:
                         )
     city.executeOrders(average_speed, tick_duration, empty_bin_duration)
     city.decreaseAllFuel(tick_duration)
+    city.holdEvents(current_time)
     current_time += tick_duration
 
-    print(city.getAlertBins())
-#    sleep(0.05)
+#    print(city.getBinsStatus("Dojazdowa"))

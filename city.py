@@ -4,10 +4,11 @@ from collections import deque
 
 from command import MoveToVertice, MoveToEdge, EmptyBin
 from edge import Edge
+from event import Event
 from garbageCollector import GarbageCollector
 from localization import VerticeLocalization, EdgeLocalization, RubbishBinSide, FrozenEdgeLocalization
 from vertice import Vertice
-from rubbishBin import RubbishBin, AlertBin
+from rubbishBin import RubbishBin, AlertBin, RubbishBinType
 
 
 # create side array of bins basing on data from JSON
@@ -49,6 +50,71 @@ class City:
             trucks_data["trucks"].update(truck_status_dict)
 
         return json.dumps(trucks_data, indent=4)
+
+#method looks for distance closest to given to place bin resulting from event there
+#returns None if there is no such distance
+    def searchTemporaryBinDistance(self, edgeLocalization, side):
+        edge = self.edges[edgeLocalization.edgeNumber]
+        distance = edgeLocalization.distanceFromStart
+        if (side == "right"):
+            if (distance not in edge.rightSideBins.keys()):
+                return distance
+            step = 1
+            while (distance + step <= edge.length or distance - step >= 0):
+                if (distance + step not in edge.rightSideBins.keys()):
+                    return distance + step
+                if (distance - step not in edge.rightSideBins.keys()):
+                    return distance - step
+                step += 1
+
+        elif (side == "left"):
+            if (distance not in edge.leftSideBins.keys()):
+                return distance
+            step = 1
+            while (distance + step <= edge.length or distance - step >= 0):
+                if (distance + step not in edge.leftSideBins.keys()):
+                    return distance + step
+                if (distance - step not in edge.leftSideBins.keys()):
+                    return distance - step
+                step += 1
+        return None
+
+#method tries to add event bin at given location
+#if method was unable to do it, returns False
+    def addTemporaryBin(self, edgeLocalization, side, rubbishLiters):
+        temporaryBin = RubbishBin(
+            type = "event_dump",
+            capacity = rubbishLiters,
+            usersCount = None,
+            fillLevel=rubbishLiters,
+            isTemporary = True
+        )
+        edge = self.edges[edgeLocalization.edgeNumber]
+        distance = edgeLocalization.distanceFromStart
+        if(side=="right"):
+            if(distance not in edge.rightSideBins.keys()):
+                edge.rightSideBins[distance] = temporaryBin
+                return True
+        elif(side=="left"):
+            if(distance not in edge.leftSideBins.keys()):
+                edge.leftSideBins[distance] = temporaryBin
+                return True
+        return False
+
+#method may allow to remove every bin if bin type check is removed
+#time complexity is O(n) but with type check method is meant to be run occasionally
+    def removeTemporaryBin(self, edgeLocalization, side):
+        edge = self.edges[edgeLocalization.edgeNumber]
+        distance = edgeLocalization.distanceFromStart
+        if (side == "right"):
+            if (distance in edge.rightSideBins.keys() and edge.rightSideBins[distance].type == RubbishBinType.EVENT_DUMP):
+                edge.rightSideBins.pop(distance)
+                return True
+        elif (side == "left"):
+            if (distance in edge.leftSideBins.keys() and edge.leftSideBins[distance].type == RubbishBinType.EVENT_DUMP):
+                edge.leftSideBins.pop(distance)
+                return True
+        return False
 
 # method returns rubbish bin data on a street given by streetName parameter
 #in json similar to rightSideBins and leftSideBins in topography json
@@ -533,7 +599,13 @@ class City:
                         print(f"WARNING: No bin found at location")
                     else:
                         if(garbageCollector.canCollectGarbage(bin.fillLevel)):
+                            fill_level = bin.fillLevel
                             garbageCollector.collectGarbage(bin.fillLevel)
+                            if(bin.type == RubbishBinType.EVENT_DUMP):
+                                self.removeTemporaryBin(EdgeLocalization(garbageCollector.localization.edgeNumber, garbageCollector.localization.distanceFromStart), command.side)
+                                if (self.verbose):
+                                    print(
+                                        f"Event dump at street: '{self.edges[garbageCollector.localization.edgeNumber].name}' on meter '{garbageCollector.localization.distanceFromStart}' cleared'.")
                             bin.emptyBin()
                             usedTime += emptyBinDuration
                             #Here we remove bin from set of bins where alert level is exceeded, because bin was emptied
@@ -546,7 +618,7 @@ class City:
                             )
                             if(self.verbose):
                                 print(
-                                    f"Garbage collector: '{garbageCollector.name}' collected '{bin.fillLevel} litres of garbage'.")
+                                    f"Garbage collector: '{garbageCollector.name}' collected '{fill_level}' litres of garbage'.")
                             timeLeft -= usedTime
                             heapq.heappush(heap, (-timeLeft, truck))
                         else:
@@ -714,3 +786,85 @@ class City:
                 print(f"Removed alert from bin at: '{street_name}', location {location}, side '{side}'")
 
             bin_obj.alertLevel = None
+
+#warning: method may adjust event bin location slightly if other bin is already there
+    def getEventsFromJson(self, eventsJson):
+        try:
+            events_data = json.loads(eventsJson)
+        except json.JSONDecodeError as e:
+            print(f"Invalid JSON format.")
+            print(f"Details: {e}")
+            raise
+
+        self.eventHeap = []
+
+        for event in events_data:
+            street_name = event.get("streetName")
+            distance = event.get("distance")
+            side = event.get("side")
+            day = event.get("day")
+            hour = event.get("hour")
+            minute = event.get("minute")
+            rubbish_liters = event.get("rubbishLiters")
+
+            if(street_name is None or distance is None or side is None or day is None or hour is None or minute is None or rubbish_liters is None):
+                print(f"Warning: Skipping incomplete event data: {event}")
+                continue
+
+            edge_number = self.getEdgeNumberByName(street_name)
+
+            if edge_number is None:
+                print(f"Warning: Street '{street_name}' not found.")
+                continue
+
+
+            event_localization = EdgeLocalization(edge_number, distance)
+            correct_distance = self.searchTemporaryBinDistance(event_localization, side)
+            if(correct_distance == None):
+                print(f"Unable to place additional rubbish on street: '{street_name}'")
+            correct_localization = EdgeLocalization(edge_number, correct_distance)
+            time = day*24*60+hour*60+minute
+            event_obj = Event(correct_localization, side, rubbish_liters)
+            self.eventHeap.append((time, event_obj))
+            if(self.verbose and distance != correct_distance):
+                print(f"Changed event distance from '{distance}' to '{correct_distance}' because the place was not empty")
+
+        heapq.heapify(self.eventHeap)
+
+
+
+    def getEventsCalendar(self):
+        events_list = []
+
+        for time_minutes, event_obj in self.eventHeap:
+            day = time_minutes // (24 * 60)
+            remaining = time_minutes % (24 * 60)
+            hour = remaining // 60
+            minute = remaining % 60
+
+            edge_name = self.edges[event_obj.location.edgeNumber].name
+
+            events_list.append({
+                "streetName": edge_name,
+                "distance": event_obj.location.distanceFromStart,
+                "side": event_obj.side,
+                "day": day,
+                "hour": hour,
+                "minute": minute,
+                "rubbishLiters": event_obj.rubbishLiters
+            })
+
+        return json.dumps(events_list, indent=4)
+
+
+    def holdEvents(self, current_time):
+        while self.eventHeap:
+            (time, event_obj) = heapq.heappop(self.eventHeap)
+            if(time > current_time):
+                heapq.heappush(self.eventHeap, (time, event_obj))
+                break
+            self.addTemporaryBin(
+                edgeLocalization=event_obj.location,
+                side=event_obj.side,
+                rubbishLiters=event_obj.rubbishLiters
+            )
