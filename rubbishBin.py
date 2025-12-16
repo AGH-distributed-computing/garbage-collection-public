@@ -60,7 +60,7 @@ class RubbishBin:
         elif(self.type == RubbishBinType.APARTMENT_BUILDING):
             self.fillLevel += apartment_building_time_series[series_index]
 
-        self.fillLevel %= self.capacity
+        self.fillLevel = min(self.fillLevel, self.capacity)
 
 #this class allows fast add/remove operations
 @dataclass(frozen=True)
